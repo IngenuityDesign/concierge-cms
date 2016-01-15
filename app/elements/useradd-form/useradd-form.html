@@ -1,0 +1,146 @@
+<!--
+@license
+Copyright (c) 2015 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/iron-ajax/iron-ajax.html">
+
+<dom-module id="useradd-form" >
+  <template>
+    <style>
+      :host {
+        display: block;
+      }
+      :host .container{margin-left: -15px;}
+      :host form  input{margin-left:-15px;}
+      .input-with-icon > input.form-control{padding-left:40px;}
+      .input-with-icon > iron-icon.icon{left:10px;}
+
+    </style>
+    <!--<p>
+     This is <strong>{{userEmail}}</strong>'s editable email address.
+     </p>-->
+        <form class="row" id="userForm">
+          <div class="legend">ADD A NEW RECRUIT</div>
+          <div class="input-with-icon form-group col-md-4">
+            <input type="text" value="First Name" id="fname" name="fname" class="form-control">
+              <iron-icon class="icon" icon="social:person">
+          </div>
+          <div class="input-with-icon form-group col-md-4">
+            <input type="text" value="Last Name" id="fname" name="fname" class="form-control">
+            <iron-icon class="icon" icon="social:person"></iron-icon>
+          </div>
+          <div class="input-with-icon form-group col-md-4">
+            <input is="iron-input" id="position" name="position" class="form-control"
+                   bind-value="{{position}}" placeholder="position">
+              <iron-icon class="icon" icon="communication:email"></iron-icon>
+          </div>
+
+          <hr class="col-md-12">
+           <div class="row">
+          <div class="input-with-icon form-group col-md-4">
+            <input type="text" value="Street Address 1" id="address1" name="address1" class="form-control">
+              <iron-icon class="icon" icon="social:person">
+          </div>
+          <div class="input-with-icon form-group col-md-4">
+            <input type="text" value="Street Address 2" id="address2" name="address2" class="form-control">
+              <iron-icon class="icon" icon="social:person">
+          </div>
+        </div>
+
+          <div class="input-with-icon form-group col-md-4">
+            <input is="iron-input" id="city" name="city" class="form-control"
+                   bind-value="{{city}}" placeholder="city">
+              <iron-icon class="icon" icon="communication:email"></iron-icon>
+          </div>
+          <div class="input-with-icon form-group col-md-4">
+            <input is="iron-input" id="state" name="state" class="form-control"
+                   bind-value="{{state}}" placeholder="state">
+              <iron-icon class="icon" icon="communication:email"></iron-icon>
+          </div>
+          <div class="input-with-icon form-group col-md-4">
+            <input is="iron-input" id="zip" name="zip" class="form-control"
+                   bind-value="{{zip}}" placeholder="zip">
+              <iron-icon class="icon" icon="communication:email"></iron-icon>
+          </div>
+                  <hr class="col-md-12">
+          <div class="input-with-icon form-group col-md-4">
+            <input is="iron-input" id="email" name="email" class="form-control"
+                   bind-value="{{userEmail}}" placeholder="User Email">
+              <iron-icon class="icon" icon="communication:email"></iron-icon>
+          </div>
+          <div class="input-with-icon form-group col-md-4">
+            <input is="iron-input" id="linkedInEmail" name="linkedInEmail" class="form-control"
+                   bind-value="{{linkedInEmail}}" placeholder="LinkedIn Email">
+              <iron-icon class="icon" icon="communication:email"></iron-icon>
+          </div>
+          <div class="input-with-icon form-group col-md-4">
+            <div class="btn btn btn-primary-outline pull-right " on-click="submitForm" ><span class="icon icon-add-user"></span>Add User</div>
+          </div>
+        <div class="clearfix"></div>
+        </form>
+  </template>
+<script src='//cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js'></script>
+  <script>
+    (function () {
+      'use strict';
+
+      Polymer({
+        is: 'useradd-form',
+        properties: {
+          items: {
+            type: Array,
+            notify: true,
+          },
+          userEmail:{
+            type:String,
+            value: "user@email.com"
+          },
+          token: {type:String},
+          data: {type:Object}
+        },
+        baseUrl: {type:String,value:'http://api.thinkforus.com/auth/linkedin'},
+        observers: [],
+        ready: function() {
+          this.api = api;
+          console.log(this.api);
+        },
+        submitForm:function(e){
+          e.preventDefault();
+          if(!this.checkFields()){
+            return false;
+          }
+
+        },
+        checkFields:function(){
+          this.email  = this.$.email;
+          this.fname  = this.$.fname;
+          this.lname  = this.$.lname;
+          var fields = [this.email,this.fname,this.lname];
+          fields.each(function(k,field){
+            if(this.checkIsEmpty(field)) return false;
+          });
+        },
+        checkIsEmpty:function(field){
+          return (jQuery(field).val() == '') ? true : false;
+        },
+        getQueryVariable:function(variable)
+        {
+               var query = window.location.search.substring(1);
+               var vars = query.split("&");
+               for (var i=0;i<vars.length;i++) {
+                       var pair = vars[i].split("=");
+                       if(pair[0] === variable){return pair[1];}
+               }
+               return(false);
+        }
+      });
+    })();
+  </script>
+
+</dom-module>

@@ -1,0 +1,93 @@
+<!--
+@license
+Copyright (c) 2015 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/iron-ajax/iron-ajax.html">
+<link rel="import" href="../datetime-field/datetime-field.html">
+
+<dom-module id="interview-form" >
+  <template>
+    <style>
+    #user-interview-form.row {margin-left:0; margin-right:0;}
+    #user-interview-form.row .icon.icon-arrow-bold-right:before{color:#434857;    font-size: 75px;top: 60px;left: 25px;}
+  #user-interview-form.row .col-md-5 > .col-md-6 > .btn{color:#000;font-weight:bold;min-width:150px;}
+  #user-interview-form.row .col-md-5 > .col-md-6 > .btn.btn-default-outline{color:#fff;}
+#user-interview-form.row .input-with-icon .icon{left:20px;}
+  #user-interview-form.row .input-with-icon{    padding-right: 6px;}
+  #user-interview-form.row .fake-btn{cursor:auto;}
+  #user-interview-form.row .btn-primary.fake-btn:hover{background-color:#ffc801;    border-color:#ffc801;}
+  #user-interview-form.row .btn-default-outline.fake-btn:hover{background-color:transparent;}
+    </style>
+       <form class="form form-horizontal row" id="user-interview-form">
+         <div class="legend">Manage Interview Information R.{{round}} </div>
+           <div class="row">
+             <div class="col-md-5">
+               <h3 class="col-md-12 interview-heading">INTERVIEW BEGINS</h3>
+               <div class="col-md-6">
+                 <button class="btn btn-primary fake-btn">START DATE</button></div>
+               <div class="col-md-6">
+                 <button class="btn btn-primary fake-btn">START TIME</button></div>
+             </div>
+
+             <div class="col-md-2">
+               <span class="icon icon-arrow-bold-right"></span>
+             </div>
+             <div class="col-md-5">
+                <h3 class="col-md-12 interview-heading">INTERVIEW ENDS</button></h3>
+                <div class="col-md-6">
+                  <button class="btn btn-default-outline fake-btn">START DATE</button></div>
+                    <div class="col-md-6">
+                      <button class="btn btn-default-outline fake-btn">START TIME</button></div>
+             </div>
+           </div>
+          <template is="dom-repeat" items="{{interviews}}">
+            <div class="row">
+                <datetime-field id="{{item.id}}"></datetime-field>
+            </div>
+          </template>
+          <div class="row">
+
+            <datetime-field></datetime-field>
+
+
+          </div>
+            <div class="clearfix"></div>
+      </form>
+
+
+  </template>
+<script src='//cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js'></script>
+  <script>
+    (function () {
+      'use strict';
+      Polymer({
+        is: 'interview-form',
+        properties: {
+          token: {type:String},
+          user: {type:String,observer:'userchanged'},
+          round: {type:String},
+          interviews:{type:Array,value: []},
+        },
+        observers: [],
+        ready: function() {
+          this.api = api;
+        },
+        userchanged : function(){
+          this.getInterviews(true);
+        },
+        getInterviews: function(dummy){
+          this.interviews = (typeof dummy === 'undefined') ?
+            this.api.getInterviewData() : [];
+        }
+
+      });
+    })();
+  </script>
+
+</dom-module>

@@ -1,0 +1,88 @@
+<!--
+@license
+Copyright (c) 2015 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/iron-ajax/iron-ajax.html">
+
+<dom-module id="noteadd-form" >
+  <template>
+    <link href="../../styles/toolkit-inverse.css" rel="stylesheet">
+    <style>
+      :host {
+        display: block;
+      }
+      :host .container{margin-left: -15px;}
+      :host form  input{margin-left:-15px;}
+      .input-with-icon > input.form-control{padding-left:40px;}
+      .input-with-icon > iron-icon.icon{left:10px;}
+
+    </style>
+    <div class="row">
+      <div class="container">
+        <form class="col-md-6" id="userForm">
+          <div class="input-with-icon form-group col-md-10">
+            <textarea  id="email" name="content" class="form-control">Note Content</textarea>
+          </div>
+          <div class="input-with-icon form-group col-md-10">
+            <div class="btn btn btn-primary-outline" on-click="submitForm" >Add Note</div>
+          </div>
+        </form>
+      </div>
+    </div>
+
+  </template>
+<script src='//cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js'></script>
+  <script>
+    (function () {
+      'use strict';
+
+      Polymer({
+        is: 'noteadd-form',
+        properties: {
+          items: {
+            type: Array,
+            notify: true,
+          },
+          token: {type:String},
+          data: {type:Object}
+        },
+        baseUrl: {type:String,value:'http://api.thinkforus.com/notes'},
+        observers: [],
+        ready: function() {
+          this.api = api;
+          console.log(this.api);
+        },
+        submitForm:function(e){
+          e.preventDefault();
+          if(!this.checkFields()){
+            return false;
+          }
+
+        },
+        checkFields:function(){
+            if(this.checkIsEmpty(this.$content)) return false;
+        },
+        checkIsEmpty:function(field){
+          return (jQuery(field).val() == '') ? true : false;
+        },
+        getQueryVariable:function(variable)
+        {
+               var query = window.location.search.substring(1);
+               var vars = query.split("&");
+               for (var i=0;i<vars.length;i++) {
+                       var pair = vars[i].split("=");
+                       if(pair[0] === variable){return pair[1];}
+               }
+               return(false);
+        }
+      });
+    })();
+  </script>
+
+</dom-module>

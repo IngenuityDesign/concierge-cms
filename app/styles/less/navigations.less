@@ -1,0 +1,58 @@
+paper-menu a:not([style-scope]):not(.style-scope){
+  color:#fff!important;
+  font-size:14px!important;
+  padding: 7px 15px!important;
+  min-height: auto!important;
+  &:hover{
+    border-left-color: @btn-primary-border!important;
+        font-weight: 500;
+
+  }
+}
+
+paper-menu .nav-bordered > li{
+  width: 74%;
+  margin-left: 17px!important;
+  border-radius: 6px!important;
+  &.active,&:hover,:focus{
+    background-color: @btn-primary-border;
+    border-left: 4px solid #f0ad4e;
+  }
+  &:hover{
+    a:not([style-scope]):not(.style-scope){
+      border-left-color: @btn-primary-border!important;
+    }
+  }
+}
+
+paper-menu .nav-bordered > li.active > a:not([style-scope]):not(.style-scope),
+paper-menu .nav-bordered > li.active > a:not([style-scope]):not(.style-scope):hover,
+paper-menu .nav-bordered > li.active > a:not([style-scope]):not(.style-scope):focus,
+paper-menu .nav-bordered > li.active > a:not([style-scope]):not(.style-scope):active {
+    font-weight: 500;
+    color: #000 !important;
+    border-bottom-color: @btn-primary-border;
+    border-left-color: @btn-primary-border!important;
+    padding: 7px 15px!important;
+    min-height: auto!important;
+}
+
+paper-menu .nav-bordered > li> a:not([style-scope]):not(.style-scope){
+  &:hover{
+    border-left:@btn-primary-border!important;//none;
+    color:#000!important;
+    font-weight:500px;
+  }
+}
+/** SUBMENU **/
+paper-menu ul.collapse.in {
+    background-color:#252830;
+    li{
+      background-color:#252830;
+      &.active{
+        background-color:#252830;
+        >a:not([style-scope]):not(.style-scope){color:@yellow!important;}
+      }
+      >a:not([style-scope]):not(.style-scope):hover{color:@yellow!important;}
+    }
+}

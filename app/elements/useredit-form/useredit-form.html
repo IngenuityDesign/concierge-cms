@@ -1,0 +1,167 @@
+<!--
+@license
+Copyright (c) 2015 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/iron-ajax/iron-ajax.html">
+<link rel="import" href="../../bower_components/paper-datatable/paper-datatable-card.html">
+<link rel="import" href="../../bower_components/paper-datatable/paper-datatable.html">
+<link rel="import" href="../round-tabs/round-tabs.html">
+
+<dom-module id="useredit-form" >
+  <template >
+    <style>
+      :host {
+        display: block;
+        --paper-datatable-icon-color:#fff;
+      }
+      /*:host .container{margin-left: -15px;}
+      :host form  input{margin-left:-15px;}
+      .input-with-icon > input.form-control{padding-left:40px;}
+      .input-with-icon > iron-icon.icon{left:10px;}*/
+      paper-datatable{
+        --paper-datatable-icon-color:#fff;
+        --paper-datatable-checkbox-border-color:transparent;/*#ffc801*/
+        --paper-checkbox-checkmark-color:transparent;
+        --paper-checkbox-unchecked-color:transparent;
+        --paper-datatable-header-checkbox-border-color:transparent;/*#ffc801*/
+        --paper-datatable-row-hover-color: transparent;/*#ffc801;*/
+				--paper-datatable-row-selection-color: transparent;/*#ffc801*/
+      }
+      paper-datatable paper-checkbox{display:none!important;}
+      th.paper-datatable{color:#fff!important;}
+      td.bound-cell.paper-datatable{color:#fff!important;}
+      tr.selected > td:not(:last-child){background-color:#ffc801; color:#000;}
+      /deep/ paper-datatable tr.selected > td:not(:nth-last-child(2)){background-color:#ffc801!important; color:#000!important;}
+    </style>
+
+     <!--<paper-datatable-card id="datatableCard" header="Users"  data-source="{{data}}" progress id-property="sha1">
+       <div toolbar-main>
+       </div>
+       <div toolbar-select-single>
+         <paper-icon-button icon="info"></paper-icon-button>
+       </div>
+       <div toolbar-select>
+         <paper-icon-button icon="delete" on-tap="delete"></paper-icon-button>
+       </div>-->
+       <paper-datatable id="datatable" data="{{data}}" style="color:#fff;" cell-style="color:#fff;" ><!--selectable -->
+         <paper-datatable-column id="nameColumn" header="Name" property="name"  style="min-width: 120px;color:#fff;" cell-style="color:#fff;" sortable></paper-datatable-column>
+         <paper-datatable-column header="E-mail" property="email" style="min-width: 150px;color:#fff;" cell-style="color:#fff;" sortable></paper-datatable-column>
+         <paper-datatable-column header="Phone" property="phone" style="min-width: 100px;color:#fff;" cell-style="color:#fff;" sortable></paper-datatable-column>
+         <paper-datatable-column header="Address" property="location"  style="min-width: 180px;color:#fff;" cell-style="color:#fff;" sortable>
+         </paper-datatable-column>
+         <paper-datatable-column header="Actions"  style="min-width: 250px;color:#fff;" cell-style="color:#fff;" >
+           <template>
+             <button class="btn btn-xs btn-primary-outline edit" on-click="editUser" data-id="[[value.id]]">MANAGE</button>
+             <button class="btn btn-xs btn-warning-outline deactivate" on-click="deactivateUser" data-id="[[value.id]]">DEACTIVATE</button>
+           </template>
+         </paper-datatable-column>
+
+       </paper-datatable>
+       <!--<section class="selected-form" data-id="{{selectedItem.id}}">
+         <div class="btn-group" role="group" aria-label="Basic example">
+           <template is="dom-repeat" items="{{rounds}}">
+             <button type="button" class="btn btn-primary" data-round-id="{{item.num}">RD{{item.num}}</button>
+           </template>
+        </div><span class="icon icon-squared-plus"></span>
+        <form>
+          <div class="legend">Recruit Information</div>
+          <template is="dom-repeat" items="{{userInfo}}">
+            <input type="text" class="form-control" name="{{item.name}}">{{item.label}}</button>
+          </template>
+        </form>
+      </section>-->
+
+      <round-tabs user="{{user}}" api="{{api}}" ></round-tabs>
+  </template>
+<script src='//cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js'></script>
+  <script>
+    (function () {
+      'use strict';
+      Polymer({
+        is: 'useredit-form',
+        properties: {
+          api:{type:Object},
+          token: {type:String},
+          data: {type:Object},
+          user:{
+            type:String,
+            notify: true//,
+            //value: function(){return {};}
+          }
+          //dataSource:{type:Object}
+        },
+        observers: [],
+        ready: function() {
+          this.api = api;
+          //this.userid = "1";
+
+          this.userinfo = [
+            {name:'firstName',label:'First Name'},
+            {name:'lastName',label:'Last Name'},
+            {name:'position',label:'Position Interviewing For'},
+          ]
+          this.data = [
+            {'id':1,
+            'name':'larry',
+            'email':'larry@mail.com',
+            'phone':'2032124343',
+            'location':'13 streetname road'
+          }
+          ];
+          this.user = this.data[0]['id'];
+        },
+        submitForm:function(e){
+          e.preventDefault();
+          if(!this.checkFields()){
+            return false;
+          }
+        },
+        checkFields:function(){
+          this.email  = this.$.email;
+          this.fname  = this.$.fname;
+          this.lname  = this.$.lname;
+          var fields = [this.email,this.fname,this.lname];
+          fields.each(function(k,field){
+            if(this.checkIsEmpty(field)) return false;
+          });
+        },
+        checkIsEmpty:function(field){
+          return (jQuery(field).val() == '') ? true : false;
+        },
+        getQueryVariable:function(variable)
+        {
+               var query = window.location.search.substring(1);
+               var vars = query.split("&");
+               for (var i=0;i<vars.length;i++) {
+                       var pair = vars[i].split("=");
+                       if(pair[0] === variable){return pair[1];}
+               }
+               return(false);
+        },
+        editUser:function(e){
+          this.user = this.getClickedUser(e).id;
+          var $row = $(e.target);
+          $row.parents('tr').addClass('selected');
+          console.log(this.user);
+          /*if (this.$.childComponent) {
+               this.$.childComponent.sharedValue = value;
+           }*/
+        },
+        deactivateUser:function(event){
+          var user = this.getClickedUser(e);
+        },
+        getClickedUser:function(e){
+          var user =e.model.__data__.item;
+          return user;
+        }
+      });
+    })();
+  </script>
+
+</dom-module>

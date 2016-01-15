@@ -1,0 +1,68 @@
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/iron-ajax/iron-ajax.html">
+
+<!--
+`<bind-test>` injects a healthy dose of awesome into your page.
+
+In typical use, just slap some `<bind-test>` at the top of your body:
+
+    <body>
+      <bind-test></bind-test>
+-->
+<dom-module id="bind-test" >
+  <template>
+    <link href="../../styles/toolkit-inverse.css" rel="stylesheet">
+    <style>
+      :host {
+        display: block;
+      }
+      :host .container{margin-left: -15px;}
+      :host form  input{margin-left:-15px;}
+      .input-with-icon > input.form-control{padding-left:40px;}
+      .input-with-icon > iron-icon.icon{left:10px;}
+
+    </style>
+      <array-selector id="selector" items="{{users}}" selected="{{selected}}" multi toggle></array-selector>
+      <div> Selected employees: </div>
+      <template is="dom-repeat" items="{{selected}}">
+          <div>First name: <span>{{item.first}}</span></div>
+          <div>Last name: <span>{{item.last}}</span></div>
+      </template>
+    </template>
+    <script>
+      (function () {
+        'use strict';
+
+        Polymer({
+          is: 'useradd-form',
+          properties: {
+            users: {
+              type: Array,
+              value: function() {
+                return [];
+              }
+            }
+          },
+          observers: [
+              'usersChanged(users.*)'
+          ],
+          usersChanged: function(changeRecord) {
+            if (changeRecord.path == 'users.splices') {
+              // a user was added or removed
+            } else {
+              // an individual user or its sub-properties changed
+              // check "changeRecord.path" to determine what changed
+            }
+          },
+          addUser: function(user) {
+          this.push('users', user);
+        },
+
+        removeUser: function(user) {
+          var index = this.users.indexOf(user);
+          this.splice('users', index, 1);
+        }
+    });
+  })();
+</script>
+  </dom-module>

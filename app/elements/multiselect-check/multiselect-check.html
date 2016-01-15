@@ -1,0 +1,69 @@
+<!--
+@license
+Copyright (c) 2015 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+
+<dom-module id="multiselect-check" >
+  <template>
+    <style>
+    .custom-control.multiselect-check input.multiselect-check:checked ~ .custom-control-indicator.multiselect-check,
+    .custom-control input:checked ~ .custom-control-indicator {background-color: #ffc801;border-color: #ffc801;}
+    .custom-control.multiselect-check input.multiselect-check:checked ~ .custom-control-indicator.multiselect-check,
+    .custom-control input:checked ~ .custom-control-indicator
+    .custom-select{cursor:pointer!important;}
+    </style>
+    <div class$="custom-select col-md-9 {{offset}}" style="cursor:pointer" on-click="toggleSelect">{{label}}</div>
+    <div class$="well col-md-9 hidden {{offset}}">
+      <template is="dom-repeat" items="{{options}}">
+        <div class="checkbox custom-control custom-checkbox">
+          <label>
+            <input type="checkbox" data-id="{{item.id}}" checked$="{{ isChecked(item.id) }}">
+            <span class="custom-control-indicator"></span>
+            {{item.label}}
+          </label>
+        </div>
+      </template>
+    </div>
+  </template>
+<script src='//cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js'></script>
+  <script>
+    (function () {
+      'use strict';
+      Polymer({
+        is: 'multiselect-check',
+        properties: {
+          ids:{type:Array},
+          options: {type:Array,value:[
+            {'id':'1',label:'Hotel1',checked:true},
+            {'id':'2',label:'Hotel2',checked:false},
+            {'id':'3',label:'Hotel3',checked:true},
+            {'id':'4',label:'Hotel3',checked:true},
+          ]},
+          label:{type:String,value:'Choose...'},
+          offset:{type:String,value:'col-md-offset-0'}
+        },
+        observers: [],
+        ready: function() {
+          //console.log(start);
+
+          //this.id = (typeof id !== 'undefined') ? id : this.id;
+        },
+        toggleSelect:function(e){
+          e.preventDefault();
+          var $checks = $(e.target).nextAll('.well');
+          $checks.toggleClass('hidden');
+        },
+        isChecked:function(id){
+          return $.inArray(id,this.ids) !== -1 ? true : false;
+        }
+      });
+    })();
+  </script>
+
+</dom-module>

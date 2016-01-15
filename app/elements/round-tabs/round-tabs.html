@@ -1,0 +1,100 @@
+<!--
+@license
+Copyright (c) 2015 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/iron-ajax/iron-ajax.html">
+<link rel="import" href="../userround-form/userround-form.html">
+<link rel="import" href="../interview-form/interview-form.html">
+<link rel="import" href="../hotel-form/hotel-form.html">
+<link rel="import" href="../greeters-form/greeters-form.html">
+<link rel="import" href="../team-form/team-form.html">
+
+<dom-module id="round-tabs" >
+  <template>
+    <style>
+      .icon-squared-plus:before{    font-size: 20px;    top: 16px;    color: #ffc801; cursor:pointer}
+      .btn-group.rounds-tabs button:last-of-type{border-bottom-right-radius: 4px;border-top-right-radius: 4px;}
+    </style>
+
+       <section class="selected-form" data-userid="{{user}}">
+         <div class="btn-group rounds-tabs" role="group" aria-label="Rounds">
+           <template is="dom-repeat" items="{{rounds}}">
+             <button type="button" class$="{{ activeClass(index) }} btn btn-primary" on-click="toggleRound" data-href="#rnd{{item.num}}">RD{{item.num}}</button>
+           </template>
+        </div><span class="icon icon-squared-plus" on-click="addRound"></span>
+        <div class="forms-holder">
+          <userround-form   user="{{user}}" round="{{item.num}}"></userround-form>
+          <hr>
+          <template is="dom-repeat" items="{{rounds}}">
+            <div class$="{{ hiddenClass(index) }} round-body" id="round-{{item.num}}">
+              <interview-form user="{{user}}" round="{{item.num}}"></interview-form>
+              <hr>
+              <hotel-form user="{{user}}" round="{{item.num}}"></hotel-form>
+              <hr>
+              <div class="row">
+                <div class="col-md-6"><greeters-form user="{{user}}" round="{{item.num}}"></greeters-form></div>
+                <div class="col-md-6 "><team-form user="{{user}}" round="{{item.num}}"></team-form></div>
+              </div>
+            </div>
+          </template>
+        </div>
+      </section>
+
+  </template>
+<script src='//cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js'></script>
+  <script>
+    (function () {
+      'use strict';
+      Polymer({
+        is: 'round-tabs',
+        properties: {
+          token: {type:String},
+          data: {type:Object},
+          //rounds:{type:Array,value: function() { return []; }},
+          user: {
+            type:String,
+            notify:true,
+            observer:'userchanged',
+          }
+          //dataSource:{type:Object}
+        },
+        observers: [],
+        ready: function() {
+          this.api = api;
+          this.rounds = [{'num':1},{'num':2}];
+        },
+        userchanged:function(){
+          console.log(this.user);
+        },
+        activeClass: function(index) {
+
+            return (index == '0') ? 'active' : '';
+        },
+        hiddenClass:function(index){
+          return (index == '0') ? '' : 'hidden';
+        },
+        toggleRound : function(e,detail){
+          $('.rounds-tabs button.active').removeClass('active');
+          $(e.srcElement).addClass('active');
+          var rnd =e.model.__data__.item.num;
+
+          $('.round-body').each(function(){
+            $(this).addClass('hidden');
+          });
+
+          $('.round-body#round-'+rnd ).removeClass('hidden');
+        },
+        addRound : function(e){
+          console.log(this.user);
+        }
+      });
+    })();
+  </script>
+
+</dom-module>

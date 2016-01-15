@@ -1,0 +1,28 @@
+/** LESS STYLES **/
+
+@import 'less/theme/toolkit-inverse.less';
+@btn-primary-border:  #ffc801;
+@btn-primary: #ffc801;
+@btn-primary-bg:  #ffc801;
+@yellow: #ffc801;
+@blue:#00aeef;
+@darkblue:#098dc0;
+@import 'less/buttons.less';
+@import 'less/forms.less';
+@import 'less/navigations.less';
+
+.blue{color:@blue;}
+paper-material:not([style-scope]):not(.style-scope){
+  background-color:transparent!important;
+}
+iron-selector.paper-drawer-panel > #drawer.paper-drawer-panel,
+paper-menu.paper-menu-0,
+#headerContainer.paper-scroll-header-panel,
+#drawerToolbar:not([style-scope]):not(.style-scope){
+  background-color: #252830!important;
+}
+
+//@import 'less/variables.less';
+/*.btn-primary-outline {
+  .button-outline-variant(@btn-primary-border);
+}*/
