@@ -9,7 +9,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 -->
 <link rel="import" href="../../bower_components/polymer/polymer.html">
 <link rel="import" href="../../bower_components/iron-ajax/iron-ajax.html">
-
+<link rel="import" href="../time-field/time-field.html">
 <dom-module id="hotel-form" >
   <template>
     <style>
@@ -25,14 +25,18 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
          <div class="legend">RESERVATION INFORMATION R.{{round}} </div>
            <div class="row">
              <div class="col-md-6">
-               <button class="btn btn-primary fake-btn col-md-9"> FLIGHT </button>
-               <div class="form-group col-md-8">
-                 <label for="departTime">Departing Flight Time</label>
-                 <input type="time" value="{{data.departTime}}" class="form-control" >
-              </div>
-                 <div class="form-group col-md-8">
-                   <label for="returnTime">Departing Flight Time</label>
-                   <input type="time" value="{{data.returnTime}}" class="form-control" >
+               <button class="btn btn-primary fake-btn col-md-9"> INFORMATION FOR TRAVEL </button>
+               <div class="form-group col-md-8 col-md-offset-3">
+                 <label for="ticketAgent">Ticket Agent</label>
+                 <input type="text" name="ticketAgent" id="ticketAgent" value="{{data.itinerary.ticketAgent}}" class="form-control" >
+               </div>
+                 <div class="form-group col-md-8 col-md-offset-3">
+                   <label for="confirmationNumber">Confirmation Number</label>
+                   <input type="text" name="confirmationCode" id="confirmationCode" value="{{data.itinerary.confirmationCode}}" class="form-control" >
+                 </div>
+                 <div class="form-group col-md-8 col-md-offset-3">
+                   <label for="notes">Additional Information</label>
+                   <textarea id="travel-notes" name="travel-notes" class="form-control" rows="1">{{data.itinerary.notes}}</textarea>
                  </div>
                </div>
 
@@ -40,15 +44,20 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                <span class="icon icon-arrow-bold-right"></span>
              </div>-->
              <div class="col-md-6">
-                <button class="btn btn-default-outline fake-btn col-md-9 col-md-offset-3">HOTEL</button>
+                <button class="btn btn-default-outline fake-btn col-md-9 col-md-offset-3">TRAVEL DETAILS</button>
+                <div class="form-group col-md-8 depart">
+                  <label for="departTime">Departing Flight Time</label>
+                  <time-field name="depart" time="{{departTime}}"></time-field><!--<input type="time" value="{{departTime}}" class="form-control" >-->
+               </div>
+                  <div class="form-group col-md-8 return">
+                    <label for="returnTime">Departing Flight Time</label>
+                    <time-field name="return" time="{{returnTime}}"></time-field><!--<input type="time" value="{{returnTime}}" class="form-control" >-->
+                  </div>
                 <div class="form-group col-md-8 col-md-offset-3">
-                  <label for="hotelName">Hotel Name</label>
-                  <input type="text" value="{{data.hotelName}}" class="form-control" >
+                  <label for="hotelLocation">Hotel Address</label>
+                  <input type="text" value="{{hotellocation}}" class="form-control" >
                 </div>
-                <div class="form-group col-md-8 col-md-offset-3">
-                  <label for="hotelName">Hotel Address</label>
-                  <input type="text" value="{{data.hotelAddress}}" class="form-control" >
-                </div>
+
              </div>
            </div>
             <div class="clearfix"></div>
@@ -63,22 +72,150 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       Polymer({
         is: 'hotel-form',
         properties: {
-          token: {type:String},
-          data: {type:Array},
-          interviews:{type:Array,value: []},
+          data: {type:Object,notify:true},
+          round:{type:String,notify:true},
+          departTime:{type:String,computed: 'getDepartingFlightTime(data.itinerary.flights)',notify:true},
+          returnTime:{type:String,computed: 'getReturnFlightTime(data.itinerary.flights)',notify:true},
+          hotellocation:{type:Object,computed: 'getHotelLocation(data.itinerary.reservations)',notify:true},
         },
-        observers: [],
+        observers: ['datachanged(data)',
+        'hotelchanged(hotellocation)',
+        'noteschanged(data.intinerary.notes)',
+        'hotelchanged(hotellocation)',
+        'departtimechanged(departTime)',
+        'returntimechanged(departTime)',
+      ],
         ready: function() {
           this.api = api;
-          //this.hotels = this.getReservations();
+          var self = this;
+          $('body').on('focus','#travel-notes',function(e){
+            self.expandTextarea($(this));
+          }).on('blur','#travel-notes',function(e){
+            self.contractTextarea($(this));
+          });
         },
-        getReservations:function(dummy){
-          return (dummy === "undefined" || dummy === false)
-              ? this.api.getReservationsByUserRound(user,round) :
-                  [
-                    {'id':1,'name':'Hilton Garden'},
-                  ]
-
+        hotelchanged:function(hotellocation){
+          if(this.doesRealDataExist()){
+            console.log(hotellocation);
+            var hotels  = this.data.itinerary.hotels;
+            if(hotels.length === 0) hotels = [{}];
+            hotels[0] = this.hotel;
+            console.log(this.data.itinerary.hotels);
+          }
+        },
+        noteschanged:function(notes){
+            if(typeof this.data !== 'undefined' && this.data.length > 1){
+              console.log(this.data);
+              this.data.itinerary.notes = this.notes;
+            }
+        },
+        updatedata:function(key,val,subkey){
+          this.data.itinerary[key] = val;
+          var item = this.data.itinerary;
+          if(typeof subkey !== 'undefined') item
+        },
+        datachanged: function(data){
+          //console.log(data);
+          if(this.doesRealDataExist()){
+            //if(data.itinerary.reservations.length > 0) this.hotel = data.itinerary.reservations[0];
+            //this.parseFlights(data.itinerary.flights);
+          }
+        },
+        departtimechanged:function(time){
+          console.log(time);
+        },
+        returntimechanged:function(time){
+          console.log(time);
+        },
+        getHotelLocation: function(hotels){
+          if(typeof hotels === 'undefined') return "";
+          return hotels[0];
+        },
+        getDepartingFlightTime:function(flights){
+          if(typeof flights === 'undefined') return "";
+          var theflights = this.parseFlights(flights);
+          return theflights.depart.starts;
+        },
+        getReturnFlightTime:function(flights){
+          if(typeof flights === 'undefined') return "";
+          var theflights = this.parseFlights(flights);
+          return theflights.return.starts;
+        },
+        parseFlights: function(flights){
+          if(typeof flights !== 'undefined'){
+            console.log(flights);
+            if(flights.length === 0) return this.buildFlights();
+            if(flights.length === 1) return this.buildFlights(flights[0]);
+            if(this.isDate1BeforeDate2(flights[0].starts,flights[1].starts)){
+              return this.buildFlights(flights[0],flights[1]);
+            }
+            return this.buildFlights(flights[1],flights[0]);
+          }
+        },
+        isDate1BeforeDate2: function(date1,date2){
+          return moment(date1).isBefore(date2);
+        },
+        buildFlights: function(flight1,flight2){
+          var flights ={};
+          flights.depart =this.checkGetFlight(flight1);
+          flights.return =this.checkGetFlight(flight2);
+          return flights;
+        },
+        checkGetFlight: function(flight){
+          return (typeof flight === 'undefined') ? this.buildEmptyFlight() : flight;
+        },
+        buildEmptyFlight: function(){
+          return {"starts":"","ends":"","location":"","confirmationNumber":"ticketAgent"};
+        },
+        expandTextarea:function($el){
+          $el.attr('rows',5);
+        },
+        contractTextarea:function($el){
+          $el.attr('rows',1);
+        },
+        arrayItem: function(change, index, path) {
+        // this.get(path, root) returns a value for a path
+        // relative to a root object.
+        //console.log('doing change');
+          return this.get(path, change.base[index]);
+        },
+        doesRealDataExist:function(data){
+          return ( (typeof data !== 'undefined') && (Object.keys(data).length> 1) ) ? true : false;
+        },
+        getForSubmit:function(){
+          var thefields = {
+            "flights":this.getFlightsArray(),
+            "hotels": this.getHotelsArray()
+          };
+          console.log(thefields);
+          $.extend(thefields,this.checkGetFields());
+          return thefields;
+        },
+        getHotelsArray:function(){
+          return (this.$.hotellocation == "") ? [] : [{"location":this.$.hotellocation}];
+        },
+        checkGetFields:function(){
+          var fields = ['travel-notes','ticketAgent','confirmationCode'];
+          var flds   = {};
+          fields.map(function(id){
+             var $el = $('#'+id);
+             var val = $el.val();
+             if( val != "") flds[$el.prop('name')] = val;
+          });
+          return flds;
+        },
+        getFlightsArray:function(){
+          return [
+            {"starts":this.getTheTime('depart')},
+            {"starts":this.getTheTime('return')}
+          ];
+        },
+        getTheTime:function(type){
+          return this.getTimeElement(type).compileTime();
+        },
+        getTimeElement:function(type){
+          console.log('.'+type+' time-field');
+          return document.querySelector('.'+type+' time-field');
         }
       });
     })();

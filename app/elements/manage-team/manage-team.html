@@ -1,0 +1,219 @@
+<!--
+@license
+Copyright (c) 2015 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/iron-ajax/iron-ajax.html">
+<link rel="import" href="../../bower_components/paper-datatable/paper-datatable-card.html">
+<link rel="import" href="../../bower_components/paper-datatable/paper-datatable.html">
+
+
+<dom-module id="manage-team" >
+  <template >
+    <style>
+      :host {
+        display: block;
+        --paper-datatable-icon-color:#fff;
+      }
+      /*:host .container{margin-left: -15px;}
+      :host form  input{margin-left:-15px;}
+      .input-with-icon > input.form-control{padding-left:40px;}
+      .input-with-icon > iron-icon.icon{left:10px;}*/
+      paper-datatable{
+        --paper-datatable-icon-color:#fff;
+        --paper-datatable-checkbox-border-color:transparent;/*#ffc801*/
+        --paper-checkbox-checkmark-color:transparent;
+        --paper-checkbox-unchecked-color:transparent;
+        --paper-datatable-header-checkbox-border-color:transparent;/*#ffc801*/
+        --paper-datatable-row-hover-color: transparent;/*#ffc801;*/
+				--paper-datatable-row-selection-color: transparent;/*#ffc801*/
+      }
+      paper-datatable paper-checkbox{display:none!important;}
+      th.paper-datatable{color:#fff!important;}
+      td.bound-cell.paper-datatable{color:#fff!important;}
+      tr.selected > td:not(:last-child){background-color:#ffc801; color:#000;}
+      /deep/ paper-datatable tr.selected > td:not(:nth-last-child(2)){background-color:#ffc801!important; color:#000!important;}
+      input.form-control[type="text"]{width:95%;}
+      .icon-squared-plus:before{    font-size: 20px;    top: 16px;    color: #ffc801; cursor:pointer}
+      .btn-link.modal-action{width:100%;}
+    </style>
+
+    <button class="btn btn-primary-outline edit pull-right" data-toggle="modal" data-target="#addNewTeam"><span class="icon icon-plus"></span>ADD NEW</button>
+    <br><br><div class="hr-divider">
+      <h3 class="hr-divider-content hr-divider-heading">MANAGE TEAM MEMBERS</h3> </div>
+       <paper-datatable id="datatable" data="{{data}}" style="color:#fff;" cell-style="color:#fff;" ><!--selectable -->
+         <paper-datatable-column id="nameColumn" header="FIRST NAME" property="firstName"  style="min-width: 120px;color:#fff;" cell-style="color:#fff;" sortable></paper-datatable-column>
+         <paper-datatable-column header="LAST NAME" property="lastName" style="min-width: 150px;color:#fff;" cell-style="color:#fff;" sortable></paper-datatable-column>
+
+         <paper-datatable-column header="Actions"  property="id" style="min-width: 250px;color:#fff;" cell-style="color:#fff;" >
+           <template>
+             <button class="btn btn-xs btn-primary-outline edit" on-click="doEdit" value="{{value}}">EDIT</button>
+             <button class="btn btn-xs btn-warning-outline deactivate" on-click="doDeactivate" value="{{value}}">REMOVE</button>
+           </template>
+         </paper-datatable-column>
+
+       </paper-datatable>
+       <br>
+       <div class="single-edit-box">
+
+         <form class="form form-horizontal form-inline row" id="edit-team-form">
+           <div class="hr-divider">
+             <h3 class="hr-divider-content hr-divider-heading">EDIT TEAM</h3> </div>
+           <div class="m-y col-md-12">
+             <div class="form-group col-md-4">
+             <label for="firstName" > First Name</label><br>
+             <input type="text" id="firstName" class="form-control" name="firstName" value="{{current.firstName}}">
+           </div>
+
+           <div class="form-group  col-md-4">
+             <label for="lastName" >Last Name</label><br>
+             <input type="text" id="lastName" class="form-control" name="lastName" value="{{current.lastName}}">
+           </div>
+           <div class="form-group col-md-4">
+             <label for="title" > Title</label><br>
+             <input type="text" id="title" class="form-control" name="title" value="{{current.title}}">
+           </div>
+         </div>
+             <div class="m-y col-md-12">
+               <div class="form-group  col-md-9">
+                 <label for="linkedinurl" > LINK TO LINKEDIN PROFILE</label><br>
+                 <input type="text" id="linkedinurl" class="form-control linkedinurl" name="linkedinurl" value="{{current.linkedin.url}}">
+               </div>
+            </div>
+         <button type="button" on-click="doSubmit" class="btn btn-primary-outline pull-right">
+           <span class="icon icon-check"></span>SUBMIT
+         </button>
+       <div class="clearfix"></div>
+         </form>
+       </div>
+       <div class="modal" id="addNewTeam" tabindex="-1" role="dialog" aria-labelledby="addNewTeam">
+         <div class="modal-dialog modal-sm" role="document">
+           <div class="modal-content">
+             <div class="modal-header">
+               <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+               <h4 class="modal-title">Add a Team Member</h4>
+             </div>
+             <div class="modal-body">
+               <form class="form form-horizontal" id="edit-team-form">>
+                   <div class="form-group col-md-12">
+                   <label for="addfirstName" > First Name</label><br>
+                   <input type="text" id="addfirstName" class="form-control" name="addfirstName" value="">
+                 </div>
+
+                 <div class="form-group  col-md-12">
+                   <label for="addlastName" >Last Name</label><br>
+                   <input type="text" id="addlastName" class="form-control" name="addlastName" value="">
+                 </div>
+                 <div class="form-group col-md-12">
+                   <label for="addtitle" > Title</label><br>
+                   <input type="text" id="addtitle" class="form-control" name="addtitle" value="">
+                 </div>
+                     <div class="form-group  col-md-12">
+                       <label for="addlinkedinurl" > LINK TO LINKEDIN PROFILE</label><br>
+                       <input type="text" id="addlinkedinurl" class="form-control linkedinurl" name="addlinkedinurl" value="">
+                     </div>
+
+             </div>
+             <div class="modal-actions">
+               <button type="button" class="btn-link modal-action" on-click="addTeam">
+                 <strong> ADD TEAM MEMBER</strong>
+               </button>
+             </div>
+                           </form>
+           </div>
+       </div>
+     </div>
+  </template>
+<script src='//cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js'></script>
+  <script>
+    (function () {
+      'use strict';
+      Polymer({
+        is: 'manage-team',
+        properties: {
+          api:{type:Object},
+          data: {type:Array,notify:true},
+          current:{type:Object,notify:true},
+          fieldNames:{type:Array,value: ['firstName','lastName','title','linkedin','role']},
+          defaultLocation: {type:Object, value:{           'id':'56cf3110d0fdcf0300c6cbde',name:'San Francisco'
+          }}
+        },
+        observers: ['setResponse(data)'],
+        ready: function() {
+          this.api = api;
+          this.api.getEmployees();
+          $('[data-key="#0"]').addClass('selected');
+        },
+        setResponse(data){
+          this.set('data', data);
+          console.log(this.data);
+          this.current = this.data[0];
+          setTimeout(function(){
+            $('[data-key="#0"]').addClass('selected');
+          }, 100);
+
+        },
+        getSubmitData: function(){
+
+        },
+        doEdit:function(e){
+          this.current = this.getClickedUser(e);
+          var $row = $(e.target);
+          $('#datatable tr.selected').removeClass('selected');
+          $row.parents('tr').addClass('selected');
+        },
+        addTeam: function(e){
+            var fields = this.checkFields(true);
+            if(!this.checkShowError(fields)) return false;
+          this.api.addTeamMember(fields);
+        },
+        editTeam: function(e){
+            var fields = this.checkFields();
+            if(!this.checkShowError(fields)) return false;
+            this.api.editTeamMember(this.current._id, fields);
+        },
+          checkFields:function(fromModal){
+            var pre = (typeof fromModal !== 'undefined') ? 'add' : '';
+            var names  = ['firstName','lastName','title'];
+            var _this  = this;
+            var values = $.map(names,function(name){
+                return _this.$[pre+name].value;
+            });
+            var fields = app.checkBuildFormData(names,values);
+            return this.checkMakeAPIparams(fields,pre);
+          },
+          checkMakeAPIparams:function(flds,pre){
+            if(flds === false) return false;
+            var linkedin = this.$[pre+'linkedinurl'].value;
+            if(!linkedin) return false;
+            flds.linkedin = {url:linkedin};
+            flds._location = this.defaultLocation.id
+            console.log(flds);
+            return flds;
+          },
+          checkShowError:function(fields,fromModal){
+            if(fields) return fields;
+            var $el = (typeof fromModal !== 'undefined') ? $('.modal-error') : $('.edit-form-error');
+            $el.removeClass('hidden');
+            return false;
+          },
+        doDeactivate:function(e){
+          var current = this.getClicked(e);
+        },
+        deactivater:function(event){
+
+        },
+        getClickedUser:function(e){
+          var current =e.model.__data__.item;
+          return current;
+        }
+      });
+    })();
+  </script>
+
+</dom-module>

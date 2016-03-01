@@ -46,18 +46,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                       <button class="btn btn-default-outline fake-btn">START TIME</button></div>
              </div>
            </div>
-          <template is="dom-repeat" items="{{interviews}}">
             <div class="row">
-                <datetime-field id="{{item.id}}"></datetime-field>
+              <datetime-field data-type="start" datetime="{{startDate}}" thetype="{{start}}" ></datetime-field>
+              <datetime-field data-type="end" datetime="{{endDate}}" thetype="{{end}}" ></datetime-field>
             </div>
-          </template>
-          <div class="row">
-
-            <datetime-field></datetime-field>
-
-
-          </div>
-            <div class="clearfix"></div>
       </form>
 
 
@@ -69,21 +61,39 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       Polymer({
         is: 'interview-form',
         properties: {
-          token: {type:String},
-          user: {type:String,observer:'userchanged'},
-          round: {type:String},
-          interviews:{type:Array,value: []},
+          data:{type:Object},
+          user: {type:String,},
+          round: {type:String,value:"1"},
+          startDate:{type:String,notify:true},
+          endDate:{type:String,notify:true},
+          start:{type:String,value:"start"},
+          end:{type:String,value:"end"}
         },
-        observers: [],
+        observers: ['roundchanged(data)'],
         ready: function() {
           this.api = api;
+          //this.startDate = this.data[this.round];//.startDate;
+          //this.endDate = this.data[this.round];//.endDate;
         },
-        userchanged : function(){
-          this.getInterviews(true);
+        roundchanged : function(data){
+
+          this.startDate = data.startDate;
+          this.endDate = data.endDate;
+
+        },
+        checkGetForSubmit:function(){
+          var start = this.getDateTimeElementByType('start').compileDateTime();
+          var end = this.getDateTimeElementByType('start').compileDateTime();
+          return {'startDate':start,'endDate':end};
+        },
+        getDateTimeElementByType:function(type){
+          return document.querySelector('datetime-field[data-type="'+type+'"]');
         },
         getInterviews: function(dummy){
-          this.interviews = (typeof dummy === 'undefined') ?
-            this.api.getInterviewData() : [];
+          /*this.interviews = (typeof dummy === 'undefined') ?
+            this.api.getInterviewData() : [];*/
+        },
+        notSet:function(){
         }
 
       });

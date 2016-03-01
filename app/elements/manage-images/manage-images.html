@@ -1,0 +1,178 @@
+<!--
+@license
+Copyright (c) 2015 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/iron-ajax/iron-ajax.html">
+<link rel="import" href="../../bower_components/paper-datatable/paper-datatable-card.html">
+<link rel="import" href="../../bower_components/paper-datatable/paper-datatable.html">
+<link rel="import" href="../file-upload/file-upload.html">
+
+
+<dom-module id="manage-images" >
+  <template >
+    <style>
+      :host {
+        display: block;
+        --paper-datatable-icon-color:#fff;
+      }
+      /*:host .container{margin-left: -15px;}
+      :host form  input{margin-left:-15px;}
+      .input-with-icon > input.form-control{padding-left:40px;}
+      .input-with-icon > iron-icon.icon{left:10px;}*/
+      paper-datatable{
+        --paper-datatable-icon-color:#fff;
+        --paper-datatable-checkbox-border-color:transparent;/*#ffc801*/
+        --paper-checkbox-checkmark-color:transparent;
+        --paper-checkbox-unchecked-color:transparent;
+        --paper-datatable-header-checkbox-border-color:transparent;/*#ffc801*/
+        --paper-datatable-row-hover-color: transparent;/*#ffc801;*/
+				--paper-datatable-row-selection-color: transparent;/*#ffc801*/
+      }
+      paper-datatable paper-checkbox{display:none!important;}
+      th.paper-datatable{color:#fff!important;}
+      td.bound-cell.paper-datatable{color:#fff!important;}
+      tr.selected > td:not(:last-child){background-color:#ffc801; color:#000;}
+      /deep/ paper-datatable tr.selected > td:not(:nth-last-child(2)){background-color:#ffc801!important; color:#000!important;}
+      input.form-control[type="text"]{width:95%;}
+      .icon-squared-plus:before{    font-size: 20px;    top: 16px;    color: #ffc801; cursor:pointer}
+      textarea[name="answer"]{width:100%;}
+    </style>
+
+    <button class="btn btn-primary-outline edit pull-right" on-click="addNewImage"><span class="icon icon-plus"></span>ADD NEW</button>
+    <br><br><div class="hr-divider">
+      <h3 class="hr-divider-content hr-divider-heading">MANAGE IMAGE GALLERY</h3> </div>
+       <paper-datatable id="datatable" data="{{data}}" style="color:#fff;" cell-style="color:#fff;" ><!--selectable -->
+          <paper-datatable-column id="thumbColumn" header="IMAGE" property="src" style="min-width: 60px;color:#fff;" cell-style="color:#fff;">
+            <template>
+             <img class="img-responsive" value="{{value}}">
+           </template>
+         </paper-datatable-column>
+         <paper-datatable-column id="nameColumn" header="FILE NAME" property="filename"  style="min-width: 120px;color:#fff;" cell-style="color:#fff;" sortable></paper-datatable-column>
+         <paper-datatable-column header="CAPTION TITLE" property="title" style="min-width: 150px;color:#fff;" cell-style="color:#fff;" sortable></paper-datatable-column>
+         </paper-datatable-column>
+         <paper-datatable-column header="ACTIONS"  property="id" style="min-width: 250px;color:#fff;" cell-style="color:#fff;" >
+           <template>
+             <button class="btn btn-xs btn-primary-outline edit" on-click="doEdit" value="{{value}}">EDIT</button>
+             <button class="btn btn-xs btn-warning-outline deactivate" on-click="doDeactivate" value="{{value}}">REMOVE</button>
+           </template>
+         </paper-datatable-column>
+
+       </paper-datatable>
+       <br>
+       <div class="single-edit-box">
+
+         <form class="form form-horizontal form-inline row col-md-7" id="edit-form">
+           <div class="hr-divider">
+             <h3 class="hr-divider-content hr-divider-heading">EDIT IMAGES</h3> </div>
+             <div class="m-y col-md-12">
+                 <div class="form-group col-md-12">
+                 <label for="title" >CAPTION TITLE</label><br>
+                 <input type="text" class="form-control" name="title" value="{{current.title}}">
+               </div>
+             </div>
+             <div class="m-y col-md-12">
+               <div class="form-group col-md-12">
+                 <label for="line1" >CAPTION (150 CHARACTERS)</label><br>
+                 <textarea class="form-control" rows="1" name="caption" >{{current.caption}}</textarea>
+               </div>
+             </div>
+
+             <div class="m-y col-md-12">
+               <div class="form-group col-md-12">
+               <file-upload thefile="{{current.key}}"></file-upload>
+             </div>
+             <div class="clear"></div>
+            </div>
+       </form>
+     <div class="col-md-5">
+       <img class="uploaded-file" src="{{current.src}}" />
+    </div>
+    <button type="button" on-click="doSubmit" class="btn btn-primary-outline pull-right">
+      <span class="icon icon-check"></span>SUBMIT
+    </button>
+  </div>
+       </div>
+  </template>
+<script src='//cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js'></script>
+  <script>
+    (function () {
+      'use strict';
+      Polymer({
+        is: 'manage-images',
+        properties: {
+          api:{type:Object},
+          data: {type:Array,notify:true},
+          current:{type:Object,notify:true},
+          allCategories:{type:Array,notify:true},
+          thefile:{type:String,notify:true}
+        },
+        observers: ['setResponse(data)'],
+        observers: ['loadTheFile(thefile)'],
+        ready: function() {
+          this.api = api;
+          this.api.getAttachments();
+          //$('[data-key="#0"]').addClass('selected');
+        },
+        setResponse(data){
+          this.set('data', data);
+          this.current = this.data[0]['id'];
+          setTimeout(function(){
+            $('[data-key="#0"]').addClass('selected');
+          }, 100);
+        },
+        addNewImage:function(e){
+          $('[data-key].selected').removeClass('selected');
+          this.current = {}
+        },
+        loadTheFile : function(thefile){
+          //$('#filename').val(thefile.name);
+          $(".uploaded-file").prop('src',this._makeImgSrcFromName(thefile.name));
+        },
+        doSubmit:function(e){
+          e.preventDefault();
+          if(!this.checkFields()){
+            return false;
+          }
+        },
+        doEdit:function(e){
+          this.current = this.getClickedUser(e);
+          var $row = $(e.target);
+          $('#datatable tr.selected').removeClass('selected');
+          $row.parents('tr').addClass('selected');
+        },
+        _makeImgSrcFromName: function(name){
+          return "https://s3.amazonaws.com/concierge-attachments/" + name;
+        },
+        doDeactivate:function(e){
+          var current = this.getClicked(e);
+        },
+        checkFields:function(){
+          this.email  = this.$.email;
+          this.fname  = this.$.fname;
+          this.lname  = this.$.lname;
+          var fields = [this.email,this.fname,this.lname];
+          fields.each(function(k,field){
+            if(this.checkIsEmpty(field)) return false;
+          });
+        },
+        checkIsEmpty:function(field){
+          return (jQuery(field).val() == '') ? true : false;
+        },
+        deactivater:function(event){
+
+        },
+        getClickedUser:function(e){
+          var current =e.model.__data__.item;
+          return current;
+        }
+      });
+    })();
+  </script>
+
+</dom-module>

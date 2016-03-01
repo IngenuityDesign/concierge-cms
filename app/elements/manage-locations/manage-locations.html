@@ -1,0 +1,297 @@
+<!--
+@license
+Copyright (c) 2015 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/iron-ajax/iron-ajax.html">
+<link rel="import" href="../../bower_components/paper-datatable/paper-datatable-card.html">
+<link rel="import" href="../../bower_components/paper-datatable/paper-datatable.html">
+
+
+<dom-module id="manage-locations" >
+  <template >
+    <style>
+      :host {
+        display: block;
+        --paper-datatable-icon-color:#fff;
+      }
+      /*:host .container{margin-left: -15px;}
+      :host form  input{margin-left:-15px;}
+      .input-with-icon > input.form-control{padding-left:40px;}
+      .input-with-icon > iron-icon.icon{left:10px;}*/
+      paper-datatable{
+        --paper-datatable-icon-color:#fff;
+        --paper-datatable-checkbox-border-color:transparent;/*#ffc801*/
+        --paper-checkbox-checkmark-color:transparent;
+        --paper-checkbox-unchecked-color:transparent;
+        --paper-datatable-header-checkbox-border-color:transparent;/*#ffc801*/
+        --paper-datatable-row-hover-color: transparent;/*#ffc801;*/
+				--paper-datatable-row-selection-color: transparent;/*#ffc801*/
+      }
+      paper-datatable paper-checkbox{display:none!important;}
+      th.paper-datatable{color:#fff!important;}
+      td.bound-cell.paper-datatable{color:#fff!important;}
+      tr.selected > td:not(:last-child){background-color:#ffc801; color:#000;}
+      /deep/ paper-datatable tr.selected > td:not(:nth-last-child(2)){background-color:#ffc801!important; color:#000!important;}
+      input.form-control[type="text"]{width:95%;}
+      .icon-squared-plus:before,.icon-squared-minus:before{    font-size: 20px;    top: 16px;    color: #ffc801; cursor:pointer}
+      .welcome-row.row{margin-top:15px;}
+      textarea.welcome-text{    width: 40%;   margin-left: -30px;}
+      label.manage-locations{text-transform:uppercase;}
+    </style>
+
+    <button class="btn btn-primary-outline edit pull-right" data-toggle="modal" data-target="#addNewLoc"><span class="icon icon-plus" ></span>ADD NEW</button>
+    <br><br><div class="hr-divider">
+      <h3 class="hr-divider-content hr-divider-heading">MANAGE LOCATIONS</h3> </div>
+       <paper-datatable id="datatable" data="{{data}}" style="color:#fff;" cell-style="color:#fff;" ><!--selectable -->
+         <paper-datatable-column id="nameColumn" header="COUNTRY" style="min-width: 120px;color:#fff;" cell-style="color:#fff;" sortable property="address"><template>{{value.country}}</template> </paper-datatable-column>
+         <paper-datatable-column header="CITY" style="min-width: 150px;color:#fff;" cell-style="color:#fff;" sortable property="address"><template>{{value.city}}</template></paper-datatable-column>
+         <paper-datatable-column header="STATE/PROVINCE" style="min-width: 100px;color:#fff;" cell-style="color:#fff;" sortable property="address"><template>{{value.state}}</template></paper-datatable-column>
+         <paper-datatable-column header="ZIP" style="min-width: 180px;color:#fff;" cell-style="color:#fff;" sortable property="address"><template>{{value.zip}}</template></paper-datatable-column>
+         <paper-datatable-column header="Actions"  property="id" style="min-width: 250px;color:#fff;" cell-style="color:#fff;" >
+           <template>
+             <button class="btn btn-xs btn-primary-outline edit" on-click="doEdit" value="{{value}}">EDIT</button>
+             <button class="btn btn-xs btn-warning-outline deactivate" on-click="doDeactivate" value="{{value}}">REMOVE</button>
+           </template>
+         </paper-datatable-column>
+
+       </paper-datatable>
+       <br>
+       <div class="single-edit-box">
+
+         <form class="form form-horizontal form-inline row" id="edit-form">
+           <div class="hr-divider">
+             <h3 class="hr-divider-content hr-divider-heading">EDIT LOCATION</h3> </div>
+           <div class="m-y col-md-12">
+             <div class="form-group col-md-12">
+             <label for="name" > Location Name</label><br>
+             <input type="text" class="form-control" id="name" name="name" value="{{current.name}}">
+           </div>
+         </div>
+         <div class="m-y col-md-12">
+           <div class="form-group col-md-4">
+             <label for="line1" >Address1</label><br>
+             <input type="text" class="form-control" id="line1" name="line1" value="{{current.address.line1}}">
+           </div>
+
+         <div class="form-group  col-md-4">
+           <label for="line2" >Address2</label><br>
+           <input type="text" class="form-control" id="line2" name="line2" value="{{current.address.line2}}">
+         </div>
+         <div class="form-group col-md-4">
+           <label for="country" > Country</label><br>
+           <input type="text" class="form-control" id="country" name="country" value="{{current.address.country}}">
+         </div>
+       </div>
+         <div class="m-y col-md-12">
+           <div class="form-group  col-md-4">
+             <label for="city" > City</label><br>
+             <input type="text" class="form-control" id="city" name="city" value="{{current.address.city}}">
+           </div>
+           <div class="form-group  col-md-4">
+             <label for="state" > State/Province</label><br>
+             <input type="text" class="form-control"  id="state" name="state" value="{{current.address.state}}">
+           </div>
+           <div class="form-group  col-md-4">
+             <label for="zip" > Zip</label><br>
+             <input type="text" class="form-control" id="zip" name="zip" value="{{current.address.zip}}">
+           </div>
+           <div class="clear"></div>
+         </div>
+         <button type="button" on-click="editLocation" class="btn btn-primary-outline pull-right">
+           <span class="icon icon-check"></span>SUBMIT
+         </button>
+         <div class="clear"></div>
+         <br><br>
+         <div class="col-md-12 hr-divider">
+           <h3 class="hr-divider-content hr-divider-heading">WHEN YOU ARRIVE COPY</h3> </div>
+         <div class="col-md-12 m-y welcome-section" id="addwelcome">
+           <span class="icon icon-squared-plus"  on-click="addWelcome"></span>
+             <template is="dom-repeat" items="{{current.welcome}}">
+               <div class="welcome-row row"><p class="welcome-number col-md-1">{{getWelcomeCount(index)}}</p>
+               <textarea class="form-control welcome-text col-md-8" rows="1">{{item}}</textarea><span class="icon icon-squared-minus col-md-2"  on-click="removeWelcome"></span></div>
+             </template>
+         </div>
+         <button type="button" on-click="updateWelcome" class="btn btn-primary-outline pull-right">
+           <span class="icon icon-check"></span>UPDATE
+         </button>
+       </div>
+       <div class="clearfix"></div>
+         </form>
+       </div>
+       <div class="modal" id="addNewLoc" tabindex="-1" role="dialog" aria-labelledby="addNewLoc">
+         <div class="modal-dialog modal-sm" role="document">
+           <div class="modal-content">
+             <div class="modal-header">
+               <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+               <h4 class="modal-title">Add a Location</h4>
+             </div>
+             <div class="modal-body">
+               <form class="form form-horizontal" id="add-location-form">
+                   <div class="input-group col-md-12">
+                   <label for="name" > Location Name</label><br>
+                   <input type="text" class="form-control" id="addname" name="addname" >
+                 </div>
+                 <div class="input-group col-md-12">
+                   <label for="line1" >Address1</label><br>
+                   <input type="text" class="form-control" id="addline1" name="addline1">
+                 </div>
+
+               <div class="input-group  col-md-12">
+                 <label for="line2" >Address2</label><br>
+                 <input type="text" class="form-control" id="addline2" name="addline2" >
+               </div>
+               <div class="input-group col-md-12">
+                 <label for="country" > Country</label><br>
+                 <input type="text" class="form-control" id="addcountry" name="addcountry" value="US">
+               </div>
+              <div class="input-group  col-md-12">
+                <label for="city" > City</label><br>
+                <input type="text" class="form-control" id="addcity" name="addcity" >
+              </div>
+              <div class="input-group  col-md-12">
+                <label for="state" > State/Province</label><br>
+                <input type="text" class="form-control"  id="addstate" name="addstate" value="CA" >
+              </div>
+              <div class="input-group  col-md-12">
+                <label for="zip" > Zip</label><br>
+                <input type="text" class="form-control" id="addzip" name="addzip">
+              </div>
+             </div>
+             <div class="modal-actions">
+               <button type="button" class="btn-link modal-action" on-click="addLocation">
+                 <strong>ADD LOCATION</strong>
+               </button>
+             </div>
+                           </form>
+           </div>
+       </div>
+     </div>
+  </template>
+<script src='//cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js'></script>
+  <script>
+    (function () {
+      'use strict';
+      Polymer({
+        is: 'manage-locations',
+        properties: {
+          api:{type:Object},
+          data: {type:Array,notify:true},
+          current:{type:Object,notify:true}
+        },
+        observers: ['setResponse(data)'],
+        ready: function() {
+          this.api = api;
+          this.api.getLocations();
+          //$('[data-key="#0"]').addClass('selected');
+          var _this = this;
+          $(document).on('click','.icon-squared-minus',function(e){
+            _this.removeWelcome($(this),e);
+          });
+        },
+        setResponse(data){
+          this.set('data', data);
+          if(data.length > 0){
+            this.current = this.data[0];
+            console.log(this.current);
+            setTimeout(function(){
+              $('[data-key="#0"]').addClass('selected');
+            }, 100);
+          }
+        },
+        doSubmit:function(e){
+          e.preventDefault();
+          if(!this.checkFields()){
+            return false;
+          }
+        },
+        addWelcome:function(e){
+          var welcome = document.createElement('div');
+          welcome.classList.add('welcome-row');
+          welcome.classList.add('row');//<div class="welcome-row row style-scope manage-locations">
+          var inner = '<p class="welcome-number col-md-1 style-scope manage-locations">'+this.getWelcomeCount()+'</p>'+
+          '<textarea class="welcome-text form-control col-md-8 style-scope manage-locations" rows="1"></textarea>'+
+          '<span class="icon icon-squared-minus col-md-2 style-scope manage-locations" on-click="removeWelcome"></span></div>';
+          welcome.innerHTML = inner;
+          Polymer.dom(this.$.addwelcome).appendChild(welcome);//.append(e);
+          Polymer.dom(this.$.addwelcome).flush();
+        },
+        removeWelcome:function($el,e){
+          console.log($el.parents('.welcome-row').remove());
+        },
+        getWelcomeCount:function(index){
+          return (typeof index === 'undefined') ? $('.welcome-section .welcome-row').length +1 : parseInt(index) +1;
+        },
+        updateWelcome:function(e){
+          e.preventDefault();
+          var welcomes = [];
+          $('#addwelcome .welcome-row').each(function(i,row){
+            var val = $(this).find('textarea').val();
+            if(val !== "") welcomes.push(val);
+          });
+          console.log(welcomes);
+          //return false;
+          this.current.welcome = welcomes;
+          this.api.updateLocations(this.current._id, this.current);
+        },
+        doEdit:function(e){
+          this.current = this.getClickedUser(e);
+          var $row = $(e.target);
+          $('#datatable tr.selected').removeClass('selected');
+          $row.parents('tr').addClass('selected');
+        },
+        doDeactivate:function(e){
+          var current = this.getClicked(e);
+        },
+        checkFields:function(fromModal){
+          var pre = (typeof fromModal !== 'undefined') ? 'add' : '';
+          var names  = ['line1','country','city','state','zip'];
+          var _this  = this;
+          var values = $.map(names,function(name){
+              return _this.$[pre+name].value;
+          });
+          var fields = app.checkBuildFormData(names,values);
+          return this.checkMakeAPIparams(fields,pre);
+        },
+        checkMakeAPIparams:function(flds,pre){
+          if(flds === false) return false;
+          var line2 = this.$[pre+'line2'].value;
+          if(line2 !== "") flds.line2 = line2;
+          var _name = this.$[pre+'name'].value;
+          if(_name === '') return false;
+          return {name: _name, address: flds };
+        },
+        deactivater:function(event){
+
+        },
+        editLocation:function(e){
+          var fields = this.checkFields();
+          if(!this.checkShowError(fields)) return false;
+          fields.welcome = this.current.welcome;
+          this.api.updateLocations(this.current._id, fields);
+        },
+        checkShowError:function(fields,fromModal){
+          if(fields) return fields;
+          var $el = (typeof fromModal !== 'undefined') ? $('.modal-error') : $('.edit-form-error');
+          $el.removeClass('hidden');
+          return false;
+        },
+        addLocation:function(e){
+          var fields = this.checkFields(true);
+          if(!this.checkShowError(fields,true)) return false;
+          this.api.addLocations(fields);
+        },
+        getClickedUser:function(e){
+          var current =e.model.__data__.item;
+          return current;
+        }
+      });
+    })();
+  </script>
+
+</dom-module>

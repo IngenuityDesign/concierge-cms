@@ -1,0 +1,224 @@
+<!--
+@license
+Copyright (c) 2015 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/iron-ajax/iron-ajax.html">
+<link rel="import" href="../../bower_components/paper-datatable/paper-datatable-card.html">
+<link rel="import" href="../../bower_components/paper-datatable/paper-datatable.html">
+<link rel="import" href="../multiselect-check/multiselect-check.html">
+
+
+<dom-module id="manage-faqs" >
+  <template >
+    <style>
+      :host {
+        display: block;
+        --paper-datatable-icon-color:#fff;
+      }
+      /*:host .container{margin-left: -15px;}
+      :host form  input{margin-left:-15px;}
+      .input-with-icon > input.form-control{padding-left:40px;}
+      .input-with-icon > iron-icon.icon{left:10px;}*/
+      paper-datatable{
+        --paper-datatable-icon-color:#fff;
+        --paper-datatable-checkbox-border-color:transparent;/*#ffc801*/
+        --paper-checkbox-checkmark-color:transparent;
+        --paper-checkbox-unchecked-color:transparent;
+        --paper-datatable-header-checkbox-border-color:transparent;/*#ffc801*/
+        --paper-datatable-row-hover-color: transparent;/*#ffc801;*/
+				--paper-datatable-row-selection-color: transparent;/*#ffc801*/
+      }
+      paper-datatable paper-checkbox{display:none!important;}
+      th.paper-datatable{color:#fff!important;}
+      td.bound-cell.paper-datatable{color:#fff!important;}
+      tr.selected > td:not(:last-child){background-color:#ffc801; color:#000;}
+      /deep/ paper-datatable tr.selected > td:not(:nth-last-child(2)){background-color:#ffc801!important; color:#000!important;}
+      input.form-control[type="text"]{width:95%;}
+      .icon-squared-plus:before{    font-size: 20px;    top: 16px;    color: #ffc801; cursor:pointer}
+      textarea[name="answer"]{width:100%;}
+    </style>
+
+    <button class="btn btn-primary-outline edit pull-right"  data-toggle="modal" data-target="#addNewFaq"><span class="icon icon-plus" ></span>ADD NEW</button>
+    <br><br><div class="hr-divider">
+      <h3 class="hr-divider-content hr-divider-heading">MANAGE FAQS</h3> </div>
+       <paper-datatable id="datatable" data="{{data}}" style="color:#fff;" cell-style="color:#fff;" ><!--selectable -->
+         <paper-datatable-column id="nameColumn" header="QUESTION" property="question"  style="min-width: 120px;color:#fff;" cell-style="color:#fff;" sortable></paper-datatable-column>
+         <paper-datatable-column header="CATEGORY" property="category" style="min-width: 150px;color:#fff;" cell-style="color:#fff;" sortable></paper-datatable-column>
+         </paper-datatable-column>
+         <paper-datatable-column header="ACTIONS"  property="id" style="min-width: 250px;color:#fff;" cell-style="color:#fff;" >
+           <template>
+             <button class="btn btn-xs btn-primary-outline edit" on-click="doEdit" value="{{value}}">EDIT</button>
+             <button class="btn btn-xs btn-warning-outline deactivate" on-click="doDeactivate" value="{{value}}">REMOVE</button>
+           </template>
+         </paper-datatable-column>
+
+       </paper-datatable>
+       <br>
+       <div class="single-edit-box">
+
+         <form class="form form-horizontal form-inline row" id="edit-faq-form">
+           <div class="hr-divider">
+             <h3 class="hr-divider-content hr-divider-heading">EDIT FAQ</h3> </div>
+           <div class="m-y col-md-12">
+             <div class="form-group col-md-12">
+             <label for="name" > QUESTION</label><br>
+             <input type="text" class="form-control" id="question" name="question" value="{{current.question}}">
+           </div>
+         </div>
+         <div class="m-y col-md-12">
+           <div class="form-group col-md-6">
+             <label for="line1" >ANSWER</label><br>
+             <textarea class="form-control" rows="1" id="answer" name="answer" >{{current.answer}}</textarea>
+           </div>
+       </div>
+
+         <div class="m-y col-md-12">
+           <div class="form-group col-md-6">
+           <multiselect-check ids="{{_getCategoryIds(current.categories)}}" options="{{allCategories}"></multiselect-check>
+         </div>
+           <button type="button" on-click="editFaq" class="btn btn-primary-outline pull-right">
+             <span class="icon icon-check"></span>SUBMIT
+           </button>
+         </div>
+         <div class="clear"></div>
+
+
+         </form>
+       </div>
+       <div class="modal" id="addNewFaq" tabindex="-1" role="dialog" aria-labelledby="addNewFaq">
+         <div class="modal-dialog modal-sm" role="document">
+           <div class="modal-content">
+             <div class="modal-header">
+               <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+               <h4 class="modal-title">Add a Location</h4>
+             </div>
+             <div class="modal-body">
+               <form class="form form-horizontal" id="add-faq-form">
+                 <div class="input-group">
+                 <label for="question" class="col-md-2">Question:</label>
+                 <input type="text" name="question" class="col-md-8 col-md-offset-2" id="addquestion" />
+                 </div>
+                 <div class="input-group">
+                   <label for="answer" class="col-md-2">Answer:</label>
+                   <input type="text" name="answer" class="col-md-8 col-md-offset-2" id="addanswer" />
+                 </div>
+             </div>
+             <div class="modal-actions">
+               <button type="button" class="btn-link modal-action" on-click="addFaq">
+                 <strong>ADD FAQ</strong>
+               </button>
+               <div class="clearfix"></div>
+             </div>
+                           </form>
+           </div>
+       </div>
+     </div>
+  </template>
+<script src='//cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js'></script>
+  <script>
+    (function () {
+      'use strict';
+      Polymer({
+        is: 'manage-faqs',
+        properties: {
+          api:{type:Object},
+          data: {type:Array,notify:true},
+          current:{type:Object,notify:true},
+          allCategories:{type:Array,notify:true},
+          currentKey : {type:String,value:0}
+        },
+        observers: ['setResponse(data)'],
+        ready: function() {
+          this.api = api;
+          //this.data =
+          this.api.getFaqs();
+          $('[data-key="#0"]').addClass('selected');
+          //this.allCategories = this.api.getCategories();
+        },
+        setResponse(data){
+          this.set('data', data);
+          if(data.length > 0){
+            this.current = this.data[0];
+            setTimeout(function(){
+              $('[data-key="#0"]').addClass('selected');
+            }, 100);
+          }
+        },
+        doSubmit:function(e){
+          e.preventDefault();
+          if(!this.checkFields()){
+            return false;
+          }
+        },
+        doEdit:function(e){
+          this.current = this.getClickedUser(e);
+          this.currentKey = $(e.srcElement).parents('tr').data('key');//.index();
+          var $row = $(e.target);
+          $('#datatable tr.selected').removeClass('selected');
+          $row.parents('tr').addClass('selected');
+        },
+        doDeactivate:function(e){
+          var current = this.getClicked(e);
+        },
+        deactivater:function(event){
+
+        },
+        editFaq:function(e){
+          var q = this.$.question.value;
+          var a = this.$.answer.value;
+          if(q === "" || a === ""){
+            $('#edit-faq-form .error').addClass('active');
+            return false;
+          }
+          if(typeof this.data === 'undefined') this.data = [];
+          var key = this.parseCurrentKey();
+          /*console.log(this.data);
+          console.log(this.current);
+          console.log(this.data[]); return false;*/
+          if(!$.isArray(this.data)) this.data = [this.data];
+          this.data[key] = {'question':q,'answer':a};
+          this.api.addFaqs(this.data);
+        },
+        parseCurrentKey:function(){
+          var idx = this.currentKey.replace('#','');
+          return idx;//parseInt(idx)+1;
+        },
+        addFaq:function(e){
+          var q = this.$.addquestion.value;
+          var a = this.$.addanswer.value;
+          if(q === "" || a === ""){
+            $('.modal-error').addClass('active');
+            return false;
+          }
+          if(typeof this.data === 'undefined') this.data = [];
+          if(!$.isArray(this.data)) this.data = [this.data];
+          console.log(this.data);
+          this.data.push({'question':q,'answer':a});
+          this.api.addFaqs(this.data);
+
+        },
+        _getCategoryIds(categories){
+          if(typeof categories !== 'undefined'){
+              if(categories.length > 0){
+                return categories.map(function(cat){
+                  return cat.id;
+                });
+              }
+          }
+          return [];
+        },
+        getClickedUser:function(e){
+          var current =e.model.__data__.item;
+          return current;
+        }
+      });
+    })();
+  </script>
+
+</dom-module>

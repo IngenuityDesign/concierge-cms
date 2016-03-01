@@ -1,0 +1,255 @@
+<!--
+@license
+Copyright (c) 2015 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/iron-ajax/iron-ajax.html">
+<link rel="import" href="../../bower_components/paper-datatable/paper-datatable-card.html">
+<link rel="import" href="../../bower_components/paper-datatable/paper-datatable.html">
+
+
+<dom-module id="manage-greeters" >
+  <template >
+    <style>
+      :host {
+        display: block;
+        --paper-datatable-icon-color:#fff;
+      }
+      /*:host .container{margin-left: -15px;}
+      :host form  input{margin-left:-15px;}
+      .input-with-icon > input.form-control{padding-left:40px;}
+      .input-with-icon > iron-icon.icon{left:10px;}*/
+      paper-datatable{
+        --paper-datatable-icon-color:#fff;
+        --paper-datatable-checkbox-border-color:transparent;/*#ffc801*/
+        --paper-checkbox-checkmark-color:transparent;
+        --paper-checkbox-unchecked-color:transparent;
+        --paper-datatable-header-checkbox-border-color:transparent;/*#ffc801*/
+        --paper-datatable-row-hover-color: transparent;/*#ffc801;*/
+				--paper-datatable-row-selection-color: transparent;/*#ffc801*/
+      }
+      paper-datatable paper-checkbox{display:none!important;}
+      th.paper-datatable{color:#fff!important;}
+      td.bound-cell.paper-datatable{color:#fff!important;}
+      tr.selected > td:not(:last-child){background-color:#ffc801; color:#000;}
+      /deep/ paper-datatable tr.selected > td:not(:nth-last-child(2)){background-color:#ffc801!important; color:#000!important;}
+      input.form-control[type="text"]{width:95%;}
+      .icon-squared-plus:before{    font-size: 20px;    top: 16px;    color: #ffc801; cursor:pointer}
+      textarea.bio{width:80%;}
+      .btn-link.modal-action{width:100%;}
+    </style>
+
+    <button class="btn btn-primary-outline edit pull-right" data-toggle="modal" data-target="#addNewGreeter"><span class="icon icon-plus"  ></span>ADD NEW</button>
+    <br><br><div class="hr-divider">
+      <h3 class="hr-divider-content hr-divider-heading">MANAGE  GREETERS</h3> </div>
+       <paper-datatable id="datatable" data="{{data}}" style="color:#fff;" cell-style="color:#fff;" ><!--selectable -->
+         <paper-datatable-column id="nameColumn" header="FIRST NAME" property="firstName"  style="min-width: 120px;color:#fff;" cell-style="color:#fff;" sortable></paper-datatable-column>
+         <paper-datatable-column header="LAST NAME" property="lastName" style="min-width: 150px;color:#fff;" cell-style="color:#fff;" sortable></paper-datatable-column>
+         <paper-datatable-column header="EMAIL" property="email" style="min-width: 150px;color:#fff;" cell-style="color:#fff;" sortable></paper-datatable-column>
+         </paper-datatable-column>
+         <paper-datatable-column header="Actions"  property="id" style="min-width: 250px;color:#fff;" cell-style="color:#fff;" >
+           <template>
+             <button class="btn btn-xs btn-primary-outline edit" on-click="doEdit" value="{{value}}">EDIT</button>
+             <button class="btn btn-xs btn-warning-outline deactivate" on-click="doDeactivate" value="{{value}}">REMOVE</button>
+           </template>
+         </paper-datatable-column>
+       </paper-datatable>
+       <br>
+       <div class="single-edit-box">
+         <form class="form form-horizontal form-inline row" id="edit-form">
+           <div class="hr-divider">
+             <h3 class="hr-divider-content hr-divider-heading">EDIT GREETERS</h3> </div>
+           <div class="m-y col-md-12">
+             <div class="form-group col-md-4">
+             <label for="firstName" > First Name</label><br>
+             <input type="text" class="form-control" id="firstName" name="firstName" value="{{current.firstName}}">
+           </div>
+
+           <div class="form-group  col-md-4">
+             <label for="lastName" >Last Name</label><br>
+             <input type="text" class="form-control" id="lastName" name="lastName" value="{{current.lastName}}">
+           </div>
+           <div class="form-group col-md-4">
+             <label for="title" > Title</label><br>
+             <input type="text" class="form-control" id="title" name="title" value="{{current.title}}">
+           </div>
+         </div>
+         <div class="m-y col-md-12">
+           <div class="form-group  col-md-4">
+             <label for="landline" > Landline Phone #</label><br>
+             <input type="text" class="form-control" id="landline" name="landline" value="{{current.phones.work}}">
+           </div>
+           <div class="form-group  col-md-4">
+             <label for="mobile" >Mobile Phone #</label><br>
+             <input type="text" class="form-control" id="mobile" name="mobile" value="{{current.phones.cell}}">
+           </div>
+           <div class="form-group  col-md-4">
+             <label for="email" > Zip</label><br>
+             <input type="text" class="form-control" id="email" name="email" value="{{current.email}}">
+           </div>
+           <div class="clearfix"></div>
+         </div>
+         <br><br>
+         <div class="m-y col-md-12">
+           <div class="form-group  col-md-9">
+             <label for="bio" > BIO (150 CHARACTERS)</label><br>
+             <textarea class="form-control bio" id="bio" name="bio" >{{current.bio}}</textarea>
+           </div>
+        </div>
+         <div class="clearfix"></div>
+         <br><br>
+         <button type="button" on-click="editGreeter" class="btn btn-primary-outline pull-right">
+           <span class="icon icon-check"></span>SUBMIT
+         </button>
+
+         <!--<button type="button" on-click="updateWelcome" class="btn btn-primary-outline pull-right">
+           <span class="icon icon-check"></span>UPDATE
+         </button>-->
+       </div>
+       <div class="clearfix"></div>
+         </form>
+       </div>
+       <div class="modal" id="addNewGreeter" tabindex="-1" role="dialog" aria-labelledby="addNewGreeter">
+         <div class="modal-dialog modal-sm" role="document">
+           <div class="modal-content">
+             <div class="modal-header">
+               <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+               <h4 class="modal-title">Add a Location</h4>
+             </div>
+             <div class="modal-body">
+               <form class="form form-horizontal" id="add-round-form">
+                 <div class="form-group col-md-12">
+                 <label for="firstName" > First Name</label><br>
+                 <input type="text" class="form-control" id="addfirstName" name="addfirstName" value="Larry">
+               </div>
+
+               <div class="form-group  col-md-12">
+                 <label for="lastName" >Last Name</label><br>
+                 <input type="text" class="form-control" id="addlastName" name="addlastName" value="Jones">
+               </div>
+               <div class="form-group col-md-12">
+                 <label for="title" > Title</label><br>
+                 <input type="text" class="form-control" id="addtitle" name="addtitle" value="VP Sales">
+               </div>
+                 <div class="form-group  col-md-12">
+                   <label for="landline" > Landline Phone #</label><br>
+                   <input type="text" class="form-control" id="addlandline" name="addlandline" value="2243294206">
+                 </div>
+                 <div class="form-group  col-md-12">
+                   <label for="mobile" >Mobile Phone #</label><br>
+                   <input type="text" class="form-control" id="addmobile" name="addmobile" value="">
+                 </div>
+                 <div class="form-group  col-md-12">
+                   <label for="email" > Email</label><br>
+                   <input type="text" class="form-control" id="addemail" name="addemail" value="ljones@visaemails.com">
+                 </div>
+                  <div class="form-group  col-md-12">
+                    <label for="bio" > BIO (150 CHARACTERS)</label><br>
+                    <textarea class="form-control addbio col-md-12" id="addbio" name="addbio" ></textarea>
+                  </div>
+             </div>
+             <div class="modal-actions">
+               <button type="button" class="btn-link modal-action" on-click="addGreeter">
+                 <strong>Add Greeter</strong>
+               </button>
+             </div>
+                           </form>
+           </div>
+       </div>
+     </div>
+  </template>
+<script src='//cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js'></script>
+  <script>
+    (function () {
+      'use strict';
+      Polymer({
+        is: 'manage-greeters',
+        properties: {
+          api:{type:Object},
+          data: {type:Array,notify:true},
+          current:{type:Object,notify:true},
+          defaultLocation: {type:Object, value:{           'id':'56cf3110d0fdcf0300c6cbde',name:'San Francisco'
+          }}
+        },
+        observers: ['setResponse(data)'],
+        ready: function() {
+          this.api = api;
+          this.api.getLocations();
+          $('[data-key="#0"]').addClass('selected');
+        },
+        setResponse(data){
+          this.set('data', data);
+          this.current = this.data[0];
+          setTimeout(function(){
+            $('[data-key="#0"]').addClass('selected');
+          }, 100);
+
+        },
+        doSubmit:function(e){
+          e.preventDefault();
+          this.current.role = "greeter";
+          if(!this.checkFields()){
+            return false;
+          }
+        },
+        doEdit:function(e){
+          this.current = this.getClickedUser(e);
+          var $row = $(e.target);
+          $('#datatable tr.selected').removeClass('selected');
+          $row.parents('tr').addClass('selected');
+        },
+        doDeactivate:function(e){
+          var current = this.getClicked(e);
+        },
+        addGreeter:function(e){
+          var fields = this.checkFields(true);
+          if(!this.checkShowError(fields)) return false;
+          this.api.addGreeters(fields);
+        },
+        editGreeter:function(e){
+          var fields = this.checkFields();
+          if(!this.checkShowError(fields)) return false;
+          this.api.editGreeters(this.current._id, fields);
+        },
+        checkFields:function(fromModal){
+          var pre = (typeof fromModal !== 'undefined') ? 'add' : '';
+          var names  = ['firstName','lastName','email','title','bio'];
+          var _this  = this;
+          var values = $.map(names,function(name){
+              return _this.$[pre+name].value;
+          });
+          var fields = app.checkBuildFormData(names,values);
+          //console.log(this.checkMakeAPIparams(fields,pre));
+          return this.checkMakeAPIparams(fields,pre);
+        },
+        checkMakeAPIparams:function(flds,pre){
+          if(flds === false) return false;
+          var phones  = {'work':'',cell:''};
+          phones.cell = this.$[pre+'mobile'].value;
+          phones.work = this.$[pre+'landline'].value;
+          $.extend(flds, {phones: phones,_location:this.defaultLocation.id });
+          return flds;
+        },
+        checkShowError:function(fields,fromModal){
+          if(fields) return fields;
+          var $el = (typeof fromModal !== 'undefined') ? $('.modal-error') : $('.edit-form-error');
+          $el.removeClass('hidden');
+          return false;
+        },
+        deactivater:function(event){
+
+        },
+        getClickedUser:function(e){
+          var current =e.model.__data__.item;
+          return current;
+        }
+      });
+    })();
+  </script>
+
+</dom-module>

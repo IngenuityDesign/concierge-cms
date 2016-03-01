@@ -9,6 +9,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 -->
 <link rel="import" href="../../bower_components/polymer/polymer.html">
 <link rel="import" href="../../bower_components/iron-ajax/iron-ajax.html">
+<link rel="import" href="../../bower_components/iron-localstorage/iron-localstorage.html">
 
 <dom-module id="cms-api">
   <template>
@@ -18,18 +19,85 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       }
     </style>
     <iron-ajax id="auth" url="{{url}}" method="GET" handle-as="json" content-type="application/json"
-               last-response="{{data}}" on-response="storeResponse"></iron-ajax>
+               last-response="{{data}}" on-response="storeResponse">
+    </iron-ajax>
     <iron-ajax id="add_user" url="{{url}}" method="POST" handle-as="json"
                content-type="application/json" last-response="{{data}}"
-               on-response="{{handleAdd}}"></iron-ajax>
+               on-response="handleAdd" headers='{{_computeHeaders(token)}}'>
+    </iron-ajax>
     <iron-ajax id="get_users" url="{{url}}" method="GET" handle-as="json"
               content-type="application/json" last-response="{{data}}"
-              on-response="{{handleGet}}"></iron-ajax>
-    <iron-ajax id="add_note" url="{{url}}" method="POST" handle-as="json"
+              on-response="handleGet" headers='{{_computeHeaders(token)}}'>
+    </iron-ajax>
+    <iron-ajax id="get_single_user" url="{{url}}" method="GET" handle-as="json"
               content-type="application/json" last-response="{{data}}"
-              on-response="{{handleAddNote}}"></iron-ajax>
+              on-response="handleGetSingle" headers='{{_computeHeaders(token)}}'>
+    </iron-ajax>
+    <iron-ajax id="add_round" url="{{url}}" method="POST" handle-as="json"
+              content-type="application/json" last-response="{{data}}"
+              on-response="handleAddRound" headers='{{_computeHeaders(token)}}'>
+    </iron-ajax>
+    <iron-ajax id="update_user" url="{{url}}" method="PATCH" handle-as="json"
+              content-type="application/json" last-response="{{data}}"
+              on-response="handleUpdateUser" headers='{{_computeHeaders(token)}}'>
+    </iron-ajax>
+    <iron-ajax id="update_round" url="{{url}}" method="PATCH" handle-as="json"
+              content-type="application/json" last-response="{{data}}"
+              on-response="handleUpdateRound" headers='{{_computeHeaders(token)}}'>
+    </iron-ajax>
+    <iron-ajax id="get_locations" url="{{url}}" method="GET" handle-as="json"
+              content-type="application/json" last-response="{{data}}"
+              on-response="handleGetLocations" headers='{{_computeHeaders(token)}}'>
+    </iron-ajax>
+    <iron-ajax id="add_locations" url="{{url}}" method="POST" handle-as="json"
+              content-type="application/json" last-response="{{data}}"
+              on-response="handleAddLocations" headers='{{_computeHeaders(token)}}'>
+    </iron-ajax>
+    <iron-ajax id="update_locations" url="{{url}}" method="PATCH" handle-as="json"
+              content-type="application/json" last-response="{{data}}"
+              on-response="handleUpdateLocations" headers='{{_computeHeaders(token)}}'>
+    </iron-ajax>
+    <iron-ajax id="get_categories" url="{{url}}" method="GET" handle-as="json"
+              content-type="application/json" last-response="{{data}}"
+              on-response="handleGetCategories" headers='{{_computeHeaders(token)}}'>
+    </iron-ajax>
+    <iron-ajax id="add_categories" url="{{url}}" method="PATCH" handle-as="json"
+              content-type="application/json" last-response="{{data}}"
+              on-response="handleAddCategories" headers='{{_computeHeaders(token)}}'>
+    </iron-ajax>
+    <iron-ajax id="get_faqs" url="{{url}}" method="GET" handle-as="json"
+              content-type="application/json" last-response="{{data}}"
+              on-response="handleGetFaqs" headers='{{_computeHeaders(token)}}'>
+    </iron-ajax>
+    <iron-ajax id="add_faqs" url="{{url}}" method="PATCH" handle-as="json"
+              content-type="application/json" last-response="{{data}}"
+              on-response="handleAddFaqs" headers='{{_computeHeaders(token)}}'>
+    </iron-ajax>
+    <iron-ajax id="add_employees" url="{{url}}" method="POST" handle-as="json"
+              content-type="application/json" last-response="{{data}}"
+              on-response="handleAddEmployees" headers='{{_computeHeaders(token)}}'>
+    </iron-ajax>
+  <iron-ajax id="get_employees" url="{{url}}" method="GET" handle-as="json"
+            content-type="application/json" last-response="{{data}}"
+            on-response="handleGetEmployees" headers='{{_computeHeaders(token)}}'>
+  </iron-ajax>
+  <iron-ajax id="update_employees" url="{{url}}" method="PATCH" handle-as="json"
+            content-type="application/json" last-response="{{data}}"
+            on-response="handleUpdateEmployees" headers='{{_computeHeaders(token)}}'>
+  </iron-ajax>
+  <iron-ajax id="add_attachements" url="{{url}}" method="POST" handle-as="json"
+            content-type="application/json" last-response="{{data}}"
+            on-response="handleAddAttachments" headers='{{_computeHeaders(token)}}'>
+  </iron-ajax>
+<iron-ajax id="get_attachements" url="{{url}}" method="GET" handle-as="json"
+          content-type="application/json" last-response="{{data}}"
+          on-response="handleGetAttachments" headers='{{_computeHeaders(token)}}'>
+</iron-ajax>
+    <!--  <iron-ajax id="add_note" url="{{url}}" method="POST" handle-as="json"
+              content-type="application/json" last-response="{{data}}"
+              on-response="{{handleAddNote}}" headers='_computeHeaders(token)'></iron-ajax>
+  <iron-localstorage id="tokenStore" value="{{token}}" on-iron-localstorage-load-empty="authenticate"></iron-localstorage>-->
 
-    <iron-localstorage id="tokenStore" on-iron-localstorage-load-empty="authenticate"></iron-localstorage>
   </template>
 
   <script>
@@ -43,65 +111,326 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             type: Array,
             notify: true,
           },
+          add_user:{
+              notify: true,
+          },
           token: {type:String},
-          data: {type:Object}
+          data: {type:Object},
+          user: {type:Object},
+          apiBase: {type:String,value:'http://api.thinkforus.com/'},
+          baseUrl: {type:String,value:'http://api.thinkforus.com/auth/linkedin'},
+          url:{type:String}
         },
-        apiBase: {type:String,value:'http://api.thinkforus.com/'},
-        baseUrl: {type:String,value:'http://api.thinkforus.com/auth/linkedin'},
-        url:{type:String},
         observers: [
           'storeResponse(data)',
           'authenticate()'
         ],
         ready: function() {
-          var url = this.baseUrl.value;
-          this.set('token','atoken');
-          if(!this.token){
-            var params = this.checkGetIsLinkedInResponse();
-            if(params){
-              this.url = url+'/callback' + params;
+          var url = this.baseUrl;
+          //this.set('token','atoken');
+          var hasToken = this.checkSetFromStore('token');
+          if(!hasToken){
+            var resp = this.checkGetIsLinkedInResponse();
+            if(resp){
+              this.url = url+'/callback';
             }else{
               this.url = url;
-            }
-            this.authenticate();
+              resp = false;
+           }
+            this.authenticate(resp);
           }
         },
         storeResponse: function(){
-          if(this.token){return this.token;}
+          if(this.exists(this.token)){return this.token;}
           if(!this.exists(this.data)) {return false;}
           if(this.exists(this.data.url)){
              this.pingLinkedIn();
-             this.retrieveUserKey();
+             this.retrieveUserToken();
           }else if(this.exists(this.data.user)){
             var keys = ['email','firstName','lastName','fullname'];
-            this.storeMultipleByResponseKey(this.data.user,keys,'user');
-            this.checkStoreResponseKey(this.data,'jwt');
+            //this.storeMultipleByResponseKey(this.data.user,keys,'user');
+            this.set('token',this.data.jwt);
+            this.doSave("token", this.data.jwt);
           }
+        },
+        addUser:function(params){
+          var adduser = this.$.add_user;
+          adduser.url = this.apiBase+'users';
+          adduser.body = params;
+          adduser.generateRequest();
+        },
+        handleAdd:function(){
+          console.log(this.data);
+        },
+        getUsers:function(){
+          var getusers = this.$.get_users;
+          getusers.url = this.apiBase+'users';
+          getusers.generateRequest();
+        },
+        handleGet:function(){
+          this.updateRequester('useredit-form');
+        },
+        getUserSingle:function(id){
+          var getuser = this.$.get_single_user;
+          getuser.url = this.apiBase+'users/'+id;
+          getuser.generateRequest();
+        },
+        handleGetSingle:function(){
+          console.log(this.data);
+          this.updateRequester('round-tabs');
+        },
+        addRound:function(id,location){
+          var addround = this.$.add_round;
+          addround.url = this.apiBase+'/users/'+id+'/round';
+          addround.body = {"location":location};
+          addround.generateRequest();
+        },
+        handleAddRound:function(){
+          this.getElement('round-tabs').setupNewRound();
+        },
+        updateUser:function(id,params){
+          var updateUser = this.$.update_user;
+          updateUser.url = this.apiBase+'users/'+id;
+          updateUser.body = params;
+          updateUser.generateRequest();
+        },
+        handleUpdateUser:function(){
+          console.log(this.data);
+        },
+        updateEvents:function(id,rndId,params){
+            params ={ itinerary: {events: [params]} };
+            this.updateRound(id,parseInt(rndId)-1,params,this.handleUpdateEvents);
+        },
+        updateRound:function(id,rndId,params,fn){
+          var updateRound = this.$.update_round;
+          updateRound.url = this.apiBase+'users/'+id+'/round/'+rndId;
+          updateRound.body = params;
+          updateRound.onResponse = fn;
+          console.log(updateRound);
+          updateRound.generateRequest();
+        },
+        handleUpdateEvents:function(){
+          console.log(data);
+        },
+        handleUpdateRound:function(){
+          console.log(this.data);
+        },
+        updateLocations:function(id,params){
+          var updateLocation = this.$.update_locations
+          updateLocation.url = this.apiBase+'locations/'+id;
+          updateLocation.body = params;
+          updateLocation.generateRequest();
+        },
+        handleUpdateLocations:function(){
+          console.log(this.data);
+        },
+        getLocations:function(){
+          var getLocations = this.$.get_locations
+          getLocations.url = this.apiBase+'locations';
+          getLocations.generateRequest();
+        },
+        handleGetLocations:function(){
+          //console.log(this.data);
+          this.doHandleGet('manage-locations');
+        },
+        addLocations:function(params){
+          var addLocations = this.$.add_locations
+          addLocations.url = this.apiBase+'locations';
+          addLocations.body = params;
+          addLocations.generateRequest();
+        },
+        handleAddLocations:function(){
+          console.log(this.data);
+        },
+        getCategories:function(){
+          var getCategories = this.$.get_categories
+          getCategories.url = this.apiBase+'registry/faqCategories';
+          getCategories.generateRequest();
+        },
+        handleGetCategories:function(){
+          console.log(this.data);
+        },
+        addCategories:function(params){
+          var addCategories = this.$.add_categories
+          addCategories.url = this.apiBase+'registry/faqCategories';
+          addCategories.body = params;
+          addCategories.generateRequest();
+        },
+        handleAddCategories:function(){
+          console.log(this.data);
+        },
+        getFaqs:function(){
+          var faqs = this.$.get_faqs
+          faqs.url = this.apiBase+'registry';
+          console.log(faqs.url);
+          faqs.generateRequest();
+        },
+        handleGetFaqs:function(){
+          console.log('this get Registry');
+          console.log(this.data);
+          this.doHandleGet('manage-faqs','faqs');//'faqs'
+        },
+        addFaqs:function(params){
+          var addCategories = this.$.add_faqs
+          addCategories.url = this.apiBase+'registry/faqs';
+          params = JSON.stringify(params);console.log(params);
+          addCategories.body = params;//this.prepRegistryBody('faqs'); //params;
+          addCategories.generateRequest();
+        },
+        handleAddFaqs:function(){
+          console.log(this.data);
+        },
+        doHandleGet: function(id,subproperty){
+          var data = [];
+          if(typeof this.data !== 'undefined'){
+            data = (typeof subproperty !== 'undefined') ?
+                  (typeof this.data[subproperty] !== 'undefined' ? this.data[subproperty] : this.data)
+                   : this.data;
+          }
+          if(typeof data === 'string') data = JSON.parse(data);
+          this.getElement(id).setResponse(data);
+        },
+        prepRegistryBody:function(key,params){
+          var reg = {};
+          reg[key] = params;
+          console.log(reg);
+          return reg;
+        },
+        addTeamMember: function(data){
+          data.role = "team-member";
+          this.addEmployees(data,this.handleAddTeam);
+        },
+        addGreeters: function(data){
+          data.role = "greeter";
+          this.addEmployees(data,this.handleAddGreeters);
+        },
+        getTeam:function(){this.getEmployees(this.handleGetTeam);},
+        getGreeters:function(){this.getEmployees(this.handleGetGreeters);},
+        getEmployees: function(fn){
+          var get = this.$.get_employees;
+          get.url = this.apiBase+'employees';
+          get.onResponse = fn;
+          get.generateRequest();
+        },
+        editGreeters: function(id,params){
+          this.updateEmployees(id,params,this.handleUpdateGreeters);
+        },
+        editTeamMember: function(id,params){
+          this.updateEmployees(id,params,this.handleUpdateTeam);
+        },
+        updateEmployees:function(id,params,fn){
+          var emp = this.$.update_employees;
+          emp.url = this.apiBase+'employees/'+id;
+          emp.onResponse = fn;
+          emp.body = params;
+          emp.generateRequest();
+        },
+        handleUpdateGreeters:function(){
+          console.log(data);
+        },
+        handleUpdateTeam:function(){
+          console.log(data);
+        },
+        addEmployees: function(params,fn){
+          var add = this.$.add_employees;
+          add.url = this.apiBase+'employees';
+          add.onResponse = fn;
+          add.body = params;
+          add.generateRequest();
+        },
+        handleAddGreeters :function(){this.handleAddEmployees('manage-greeters')},
+        handleAddTeam :function(){this.handleAddEmployees('manage-team')},
+        handleAddEmployees: function(){
+          console.log('added Employee');
+        },
+        handleGetGreeters :function(){this.handleGetEmployees('greeter','manage-greeters')},
+        handleGetTeam :function(){
+          this.handleGetEmployees('team-member','manage-team');
+        },
+        handleGetEmployees :function(){
+          console.log(this.data);
+          var data = {'team':[],'greeters':[]};
+          this.data.map(function(v){
+            if(v.role == 'team-member'){
+              data.team.push(v);
+            }else if(v.role == 'greeter'){
+              data.greeters.push(v);
+            }
+          });
+          console.log(data);
+            this.updateRequester('manage-team',data.team);
+            this.updateRequester('manage-greeters',data.greeters);
+        },
+        addAttachments:function(params){
+          var add = this.$.addAttachments;
+          add.url = this.apiBase+'attachments';
+          add.body = params;
+          add.generateRequest();
+        },
+        handleAddAttachments:function(){
+          this.pushAttachment(data);
+        },
+        getAttachments:function(){
+            var get = this.$.get_employees;
+            get.url = this.apiBase+'attachments';
+            get.generateRequest();
+        },
+        handleGetAttachments:function(){
+            this.pushAttachment(data);
+        },
+        pushAttachment: function(data){
+          this.getElement('file-upload').loadTheFile(data);
         },
         pingLinkedIn:function(){
           window.location = this.data.url;
         },
-        retrieveUserKey:function(){
-          this.url = this.data.url+'/callback' + params;
-          this.authenticate();
+        updateRequester: function(requestorId,data){
+          data = (typeof data === 'undefined') ? this.data : data;
+          this.getElement(requestorId).setResponse(data);
         },
-        storeMultipleByResponseKey:function(data,keys){
-          keys.map(function(key){
-            this.checkSetStoreResponseKey(data,key);
-          },this);
+        getElement:function(id){
+          return document.querySelector(id);
         },
-        checkStoreResponseKey:function(data,key){
-          if(this.exists(data[key])){
-            this.set(key,data[key]);
-          }
+        retrieveUserToken:function(){
+          this.url = this.data.url+'/callback';
+          this.authenticate(params);
         },
-        authenticate:function(){
+        authenticate:function(postBody){
           var auth =  this.$.auth;
+          if(this.exists(postBody.state)){
+            auth.body = JSON.stringify(postBody);
+            auth.method = 'POST';
+          }
           auth.generateRequest();
         },
-        getToken:function(){
-          //var store = this.$tokenStore;
-          return this.token;
+        checkSetFromStore(key){
+          var stored = this.existsLocalStore(key);
+          if(stored) {
+            this.set(key,stored);
+            return stored;
+         }
+         return false;
+        },
+        checkSetUser:function(){
+          loopUser(function(k,v){
+            this.checkSetFromStore('user.'+k,v);
+          });
+        },
+        saveUser:function(user){
+          loopUser(function(k,v){
+            doStore('user.'+k,v);
+          },user);
+        },
+        loopUser: function(cb,User){
+          var User = (typeof User === 'undefined') ? this.user : User;
+          $.each(this.user.keys(),cb);
+        },
+        existsLocalStore:function(key){
+          var item = window.localStorage.getItem(key);
+          return (item !== false & item !== null) ? item : false;
+        },
+        _computeHeaders: function(){
+          return {"Authorization":"Bearer " + this.token};
         },
         setRequestAuthHeader: function(headers) {
           headers.Authorization = 'Bearer ' + this.getToken()
@@ -110,46 +439,13 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         checkGetIsLinkedInResponse:function(){
           var state = this.getQueryVar('state');
           var code  = this.getQueryVar('code');
-          if(state && code){
-            return '?code=code'+'&state='+state;
-          }
-          return false;
+          return (state && code) ? {code:code,state:state} : false;
         },
         exists:function(item){
           return (typeof item !== 'undefined' && item !== null) ? true : false;
         },
-        addUser:function(params){
-          var adduser = this.$.add_user;
-          adduser.url = this.apiBase+'users';
-          adduser.params = params;
-          this.setRequestAuthHeader(adduser.requestHeaders);
-          adduser.generateRequest();
-        },
-        handleAdd:function(){
-
-        },
-        getUsers:function(){
-          var getusers = this.$.get_users;
-          getusers.url = this.apiBase+'users';
-          getusers.params = params;
-          this.setRequestAuthHeader(getusers.requestHeaders);
-          getusers.generateRequest();
-          return this.data;
-        },
-        handleGet:function(){
-
-        },
-        addNote:function(note){
-          var addnote = this.$.add_note.url;
-          addnote.url = this.apiBase+'notes';
-          this.setRequestAuthHeader(addnote.requestHeaders);
-          addnote.bodu = {"content":note};
-          addnote.generateRequest();
-        },
-        handleAddNote:function(){
-          if(this.data){
-
-          }
+        doStore:function(key,val){
+          window.localStorage.setItem(key,val)
         },
         getQueryVar:function(variable)
         {
@@ -160,7 +456,17 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                        if(pair[0] === variable){return pair[1];}
                }
                return(false);
-        }
+        },
+        storeMultipleByResponseKey:function(data,keys){
+          keys.map(function(key){
+            this.checkStoreResponseKey(data,key);
+          },this);
+        },
+        checkStoreResponseKey:function(data,key){
+          if(this.exists(data[key])){
+            this.set('user.'+key,data[key]);
+          }
+        },
       });
     })();
   </script>

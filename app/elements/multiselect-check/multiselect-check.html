@@ -23,7 +23,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       <template is="dom-repeat" items="{{options}}">
         <div class="checkbox custom-control custom-checkbox">
           <label>
-            <input type="checkbox" data-id="{{item.id}}" checked$="{{ isChecked(item.id) }}">
+            <input type="checkbox" data-id$="{{item.id}}" checked$="{{ isChecked(item.id) }}">
             <span class="custom-control-indicator"></span>
             {{item.label}}
           </label>
@@ -61,6 +61,14 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         },
         isChecked:function(id){
           return $.inArray(id,this.ids) !== -1 ? true : false;
+        },
+        getSelected:function(){
+          console.log($('multiselect-check input[type="checkbox"]:checked'));
+          var selected = [];
+          $('multiselect-check input[type="checkbox"]:checked').map(function(){
+            selected.push($(this).attr('data-id'));
+          });
+          return selected;
         }
       });
     })();

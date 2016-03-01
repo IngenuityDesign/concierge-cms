@@ -17,7 +17,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     </style>
       <div class="team-form-holder">
         <h3 class="col-md-offset-3">MEET THE TEAM MEMBERS</h3>
-        <div ><multiselect-check label="Choose team members" ids="{{teamIds}}" options="{{team}}" offset="col-md-offset-3"></multiselect-check></div>
+        <div ><multiselect-check label="Choose team members" ids="{{teamIds}}" options="{{allTeam}}" offset="col-md-offset-3"></multiselect-check></div>
         <div class="clearfix"></div>
       </div>
   </template>
@@ -31,28 +31,42 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           token: {type:String},
           data: {type:Array},
           user:{type:Object,notify:true},
-          teamIds: {type:Array}
+          teamIds: {type:Array},
+          team: {type:Array},
+          allTeam: {type:Array}
         },
         observers: [],
         ready: function() {
           this.api = api;
           //this.hotels = this.getReservations();
-          this.getTeamIds(true);
           this.getAllTeamMembers(true);
+          this.getTeamIds(true);
+
         },
         getTeamIds:function(dummy){
-          this.teamIds = (dummy === "undefined" || dummy === false)
-              ? this.api.getTeamIdsByUserRound(user,round) : [ '1','2','4'];
+          this.teamIds = this.team.map(function(a){return a.id;});
         },
         getAllTeamMembers: function(dummy){
-          this.team = (dummy === "undefined" || dummy === false)
+          this.allTeam = (dummy === "undefined" || dummy === false)
               ? this.api.getAllTeamMembers(user,round) :
                 [
-                  {'id':'1','label':'Joe Smith | CEO','checked':true},
-                  {'id':'2','label':'Larry Jones | VP Finance','checked':false},
-                  {'id':'3','label':'Sally Thompson | Director Engineering','checked':true},
-                  {'id':'4','label':'Lonnie Brown | CMO','checked':true}
+                  {'id':'1','firstName':'Joe', 'lastName':'Smith', 'position':'CEO'},
+                  {'id':'2','firstName':'Larry' , 'lastName':'Jones', 'position':'VP Finance'},
+                  {'id':'3','firstName':'Sally', 'lastName':'Thompson', 'position':'Director Engineering'},
+                  {'id':'4','firstName':'Lonnie', 'lastName':'Brown', 'position':'CMO'}
                 ];
+          this.team = [{'id':'1'},{'id':'3'},{'id':'4'}];
+          this.allTeam = this.composeAllTeamMembers();
+        },
+        composeAllTeamMembers:function(){
+          return this.allTeam = this.allTeam.map(function(team){
+            team.label = team.firstName + team.lastName + ' | ' + team.position;
+            return team;
+          });
+        },
+        getSelected:function(){
+          var ids = document.querySelector('multiselect-check').getSelected();
+          return ids;
         }
       });
     })();

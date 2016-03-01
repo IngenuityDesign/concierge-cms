@@ -1,0 +1,69 @@
+<!--
+@license
+Copyright (c) 2015 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+
+<dom-module id="time-field" >
+  <template>
+    <style>
+.input-with-icon .icon{left:20px;    z-index: 1;}
+   .input-with-icon{    padding-right: 6px;}
+   .input-with-icon > .form-control.time-field {padding-left: 45px;}
+   .input-with-icon > .custom-select{margin-top:-1px;}
+   .input-with-icon.time-field .icon.time-field{z-index:12;}
+    </style>
+          <div class="input-with-icon">
+            <span class="icon icon-clock"></span>
+            <input name$="{{name}}Time" type="text" id="thetime" class="form-control col-md-6 time-field" style$="{{timestyle}}" placeholder="7:00" value="{{thetime}}">
+            <select class="custom-select col-md-6"  id="themeridian" name$="{{name}}Meridian" style$="{{meridianstyle}}" value="{{themeridian}}" class="">
+              <option value="AM">AM</option>
+              <option value="PM">PM</option>
+            </select>
+          </div>
+        </div>
+      <!--</template>-->
+  </template>
+  <script>
+    (function () {
+      'use strict';
+      Polymer({
+        is: 'time-field',
+        properties: {
+          name:{type:String},
+          timestyle:{type:String,value:""},
+          meridianstyle:{type:String,value:""},
+          time:{type:String, notify: true},
+          thetime:{type:String, notify: true},
+          themeridian:{type:String,value:""}
+        },
+        observers: ['roundchanged(time)'],
+        ready: function() {
+        },
+        roundchanged : function(time){
+          if(!this.isActualTime(time)) return false;
+          var time = app.parseTime(this.time);
+          this.thetime = time.time;
+          this.themeridian =  time.meridian;
+        },
+        isActualTime:function(time){
+          return (time === null || time === false || time === "" || typeof time === 'undefined') ? false : true;
+        },
+        compileTime:function(){
+          if(!this.thetime || !this.themeridian){
+            this.thetime = this.$.thetime.value;
+            this.themeridian =  this.$.themeridian.value;
+            if(!this.thetime || !this.themeridian) return false
+          }
+          return moment(this.thetime+this.themeridian, 'hh:mmA');
+        }
+      });
+    })();
+  </script>
+
+</dom-module>

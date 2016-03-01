@@ -28,11 +28,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         <form class="row" id="userForm">
           <div class="legend">ADD A NEW RECRUIT</div>
           <div class="input-with-icon form-group col-md-4">
-            <input type="text" value="First Name" id="fname" name="fname" class="form-control">
+            <input type="text" is="iron-input" bind-value="{{fname}}" id="fname" name="fname" class="form-control" placeholder="First Name">
               <iron-icon class="icon" icon="social:person">
           </div>
           <div class="input-with-icon form-group col-md-4">
-            <input type="text" value="Last Name" id="fname" name="fname" class="form-control">
+            <input is="iron-input" bind-value="{{lname}}" type="text" id="lname" name="lname" class="form-control" placeholder="Last Name">
             <iron-icon class="icon" icon="social:person"></iron-icon>
           </div>
           <div class="input-with-icon form-group col-md-4">
@@ -44,11 +44,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           <hr class="col-md-12">
            <div class="row">
           <div class="input-with-icon form-group col-md-4">
-            <input type="text" value="Street Address 1" id="address1" name="address1" class="form-control">
+            <input  is="iron-input" bind-value="{{address1}}" type="text" placeholder="Street Address 1" id="address1" name="address1" class="form-control">
               <iron-icon class="icon" icon="social:person">
           </div>
           <div class="input-with-icon form-group col-md-4">
-            <input type="text" value="Street Address 2" id="address2" name="address2" class="form-control">
+            <input  is="iron-input" bind-value="{{address2}}" type="text" placeholder="Street Address 2" id="address2" name="address2" class="form-control">
               <iron-icon class="icon" icon="social:person">
           </div>
         </div>
@@ -70,13 +70,13 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           </div>
                   <hr class="col-md-12">
           <div class="input-with-icon form-group col-md-4">
-            <input is="iron-input" id="email" name="email" class="form-control"
-                   bind-value="{{userEmail}}" placeholder="User Email">
+            <input is="iron-input" id="useremail" name="useremail" class="form-control"
+                   bind-value="{{useremail}}" placeholder="User Email">
               <iron-icon class="icon" icon="communication:email"></iron-icon>
           </div>
           <div class="input-with-icon form-group col-md-4">
-            <input is="iron-input" id="linkedInEmail" name="linkedInEmail" class="form-control"
-                   bind-value="{{linkedInEmail}}" placeholder="LinkedIn Email">
+            <input is="iron-input" id="linkedinemail" name="linkedinemail" class="form-control"
+                   bind-value="{{linkedinemail}}" placeholder="LinkedIn Email">
               <iron-icon class="icon" icon="communication:email"></iron-icon>
           </div>
           <div class="input-with-icon form-group col-md-4">
@@ -97,10 +97,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             type: Array,
             notify: true,
           },
-          userEmail:{
-            type:String,
-            value: "user@email.com"
-          },
           token: {type:String},
           data: {type:Object}
         },
@@ -115,19 +111,50 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           if(!this.checkFields()){
             return false;
           }
+          this.api()
 
         },
         checkFields:function(){
-          this.email  = this.$.email;
-          this.fname  = this.$.fname;
-          this.lname  = this.$.lname;
-          var fields = [this.email,this.fname,this.lname];
-          fields.each(function(k,field){
-            if(this.checkIsEmpty(field)) return false;
+          var fields = {
+            "firstName": this.$.fname.value,
+            "lastName":this.$.lname.value,
+            "position":this.$.position.value,
+            "address" : {
+              "line1":this.$.address1.value,
+              "city":this.$.city.value,
+              "state":this.$.state.value,
+              "zip":this.$.zip.value
+            },
+            "email":this.$.linkedinemail.value,
+          };
+          var self = this;
+          var empty = false;
+          $.each(fields,function(k,field){
+            if(typeof field !== 'object'){
+              if(self.checkIsEmpty(field)){
+                return empty = true;
+              }
+            }else{
+              $.each(field,function(key,item){
+                console.log(key);
+                console.log(item);
+                if(self.checkIsEmpty(item)){
+                  return empty = true;
+                }
+              });
+            }
           });
+          console.log(empty);
+          if(!empty){
+            fields.address.line2 = this.$.address2.value;
+            fields.contactEmail= this.$.useremail.value,
+            console.log(fields);
+            this.api.addUser(fields);
+          }
+
         },
         checkIsEmpty:function(field){
-          return (jQuery(field).val() == '') ? true : false;
+          return (field == '') ? true : false;
         },
         getQueryVariable:function(variable)
         {

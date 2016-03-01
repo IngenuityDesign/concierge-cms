@@ -22,34 +22,76 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       #user-round-form.form-inline .form-control{    width: 100%;}
       #user-round-form .more.blue{float: right;   margin-right: 30px;  font-weight: bold;cursor:pointer;margin-top:24px;}
       #user-round-form .more.blue .icon:before{font-size:25px;top:5px;}
+      #user-round-form .more.blue span:after{content:"MORE...";padding-left:10px;}
+      #user-round-form .more.blue.form-open span:after{content:"LESS..";padding-left:10px;}
       #user-round-form .btn-primary-outline{margin-top: 20px;}
+      #user-round-form .btn-primary-outline.form-open{margin-top: -65px;    margin-right: 175px;}
+      #user-round-form .m-y-md label{top: -25px;}
+      .field-toggle.off{display:none;}
+      .field-toggle.on{display:block;}
     </style>
 
-     <!--<paper-datatable-card id="datatableCard" header="Users"  data-source="{{data}}" progress id-property="sha1">
-       <div toolbar-main>
-       </div>
-       <div toolbar-select-single>
-         <paper-icon-button icon="info"></paper-icon-button>
-       </div>
-       <div toolbar-select>
-         <paper-icon-button icon="delete" on-tap="delete"></paper-icon-button>
-       </div>-->
        <form class="form form-horizontal form-inline row" id="user-round-form">
-         <div class="legend">Recruit Information </div>
-          <template is="dom-repeat" items="{{fields}}">
-            <div class$="form-group {{item.cls}}">
-              <label for="{{item.name}}" > {{item.label}}</label>
-              <input type="text" class="form-control" name="{{item.name}}" value="{{getDataVal(item.name)}}">
+         <div class="hr-divider">
+  <h3 class="hr-divider-content hr-divider-heading">Recruit Information</h3> </div>
+          <!--<template is="dom-repeat" items="{{fields}}">-->
+            <div class="form-group on">
+              <label for="firstName" > First Name</label>
+              <input type="text" class="form-control" name="firstName" value="{{data.firstName}}">
             </div>
-          </template>
-          <div class="more blue"><span class="icon icon-chevron-with-circle-down"></span> MORE...</div>
-          <button type="button" class="btn btn-primary-outline pull-right">
+            <div class="form-group on">
+              <label for="lastName" > First Name</label>
+              <input type="text" class="form-control" name="lastName" value="{{data.lastName}}">
+            </div>
+            <div class="form-group on">
+              <label for="position" > Position Interviewing For</label>
+              <input type="text" class="form-control" name="position" value="{{data.position}}">
+            </div>
+            <div class="more blue" on-click="toggleFields"><span class="icon icon-chevron-with-circle-down"></span> </div>
+
+            <div class="field-toggle off">
+              <div class="row m-y-md">
+                <div class="form-group">
+                <label for="address1" > Addres1</label>
+                <input type="text" class="form-control" name="address1" value="{{data.address.line1}}">
+              </div>
+              <div class="form-group">
+                <label for="address2" >Address2</label>
+                <input type="text" class="form-control" name="address2" value="{{data.address.address2}}">
+              </div>
+            </div>
+            <div class="row m-y-md">
+              <div class="form-group">
+                <label for="city" > City</label>
+                <input type="text" class="form-control" name="city" value="{{data.address.city}}">
+              </div>
+              <div class="form-group">
+                <label for="state" > State</label>
+                <input type="text" class="form-control" name="state" value="{{data.address.state}}">
+              </div>
+              <div class="form-group">
+                <label for="zip" > Zip</label>
+                <input type="text" class="form-control" name="zip" value="{{data.address.zip}}">
+              </div>
+            </div>
+            <div class="row m-y-md">
+              <div class="form-group">
+                <label for="linkedinEmail" > LinkedIn Email</label>
+                <input type="text" class="form-control" name="linkedinEmail" value="{{data.linkedInEmail}}">
+              </div>
+              <div class="form-group">
+                <label for="contactEmail">Email</label>
+                <input type="text" class="form-control" name="linkedinEmail" value="{{data.contactEmail}}">
+              </div>
+            </div>
+          </div>
+          <button type="button" on-click="updateUser" class="btn btn-primary-outline pull-right">
             <span class="icon icon-check"></span>UPDATE PERSONAL INFO
           </button>
-            <div class="clearfix"></div>
+
+
+          <div class="clearfix"></div>
       </form>
-      <!--<interview-form user="{{user}}" round="{{round}}"></interview-form>
-      <hotel-form user="{{user}}" round="{{round}}"></hotel-form>-->
 
 
   </template>
@@ -67,60 +109,66 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           },
           user: {type:String,
                  notify: true,
-                 observer:'userchanged'
+                 //observer:'userchanged'
           },
-          fields:{type:Array,value: [
-            {name:'firstName',label:'First Name',cls:'on'},
-            {name:'lastName',label:'Last Name',cls:'on'},
-            {name:'position',label:'Position Interviewing For',cls:'on'},
-            {name:'address1',label:'Street Address 1',cls:'show-more-only hidden'},
-            {name:'address2',label:'Street Address 2',cls:'show-more-only hidden'},
-            {name:'city',label:'City',cls:'show-more-only hidden'},
-            {name:'state',label:'State',cls:'show-more-only hidden'},
-            {name:'zip',label:'Zip',cls:'show-more-only hidden'},
-            {name:'email',label:'Email',cls:'show-more-only hidden'},
-            {name:'linkedinEmail',label:'LinkedIn Email',cls:'show-more-only hidden'},
-          ]},
-          //roundnum: {type:String,value:"1"}
-          //dataSource:{type:Object}
         },
-        observers: [],
+        observers: ['datachanged(data)'],
         ready: function() {
           this.api = api;
         },
-        userchanged: function(){
-          this.getData(true);
+        datachanged: function(data){
+          //console.log(this.data);
         },
-        getDataVal: function(key){
-          return this.data[key];
+        toggleFields:function(){
+          $('.field-toggle').toggleClass('off');
+          $('#user-round-form .btn-primary-outline').toggleClass('form-open');
+          $('#user-round-form .more.blue').toggleClass('form-open');
         },
         getData: function(dummy){
+          //console.log(this.user);
           this.data = (typeof dummy === 'undefined')
             ? this.api.getUserDataByRound(this.user,this.round) :
-              {'id':1,
-              'firstName':'larry',
-              'lastName':'Smith',
+              {'id':'56326c58cc83ab0300aec90e',
+              'firstName':'Adam',
+              'lastName':'Divelbiss',
               'position': 'VP Sales',
-              'email':'larry@mail.com',
-              'phone':'2032124343',
-              'location':'13 streetname road'
+              'contactEmail':'awdivelbiss@optonline.net',
+              'linkedInEmail':'awdivelbiss@optonline.net',
+              'address':{
+                  'line1':'13 test street',
+                  'line2':'',
+                  'city' : 'Norwalk',
+                  'state': '06854',
+                  'zip'  : '06854'
+                }
               };
           return data;
         },
-        submitForm:function(e){
+        updateUser:function(e){
           e.preventDefault();
-          if(!this.checkFields()){
-            return false;
-          }
+          var fields = this.checkGetFields();
+          console.log(fields);
+          this.api.updateUser(this.user,fields)
+
         },
-        checkFields:function(){
-          this.email  = this.$.email;
-          this.fname  = this.$.fname;
-          this.lname  = this.$.lname;
-          var fields = [this.email,this.fname,this.lname];
-          fields.each(function(k,field){
-            if(this.checkIsEmpty(field)) return false;
+        checkGetFields:function(){
+          var $fields = $('#user-round-form input');
+          var params = {};
+          var afields = ['address1','address2','city','state','zip'];
+          var address = {};
+          $fields.map(function(){
+            if($(this).val() != ""){
+                var key = $(this).attr('name');
+                if($.inArray(key, afields) !== -1){
+                  key = key.replace('address','line');
+                  address[key] = $(this).val();
+                }else{
+                  params[key] = $(this).val();
+                }
+            }
           });
+          params.address = address;
+          return params;
         },
         checkIsEmpty:function(field){
           return (jQuery(field).val() == '') ? true : false;

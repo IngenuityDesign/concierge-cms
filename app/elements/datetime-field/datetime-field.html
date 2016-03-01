@@ -16,22 +16,22 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
    .input-with-icon{    padding-right: 6px;}
    .input-with-icon > .form-control.time-field {padding-left: 25px;}
     </style>
-      <template is="dom-repeat" items="{{inputs}}">
-        <div class$="col-md-5 {{item.offset}}" data-id="{{id}}">
+      <!--<template is="dom-repeat" items="{{inputs}}">-->
+        <div class$="col-md-5 {{offset}}">
           <div class="col-md-6 input-with-icon">
             <span class="icon icon-calendar"></span>
-            <input type="text" name="{{item.prefix}}Date" class="form-control">
+            <input type="text" name="{{getName('Date')}}" class="form-control" value="{{date}}">
           </div>
           <div class="col-md-6 input-with-icon">
             <span class="icon icon-clock"></span>
-            <input name$="{{item.prefix}}Time" type="text" class="form-control col-md-6 time-field" placeholder="7:00">
-            <select class="custom-select col-md-6" name$="{{item.prefix}}Meridien" class="col-md-6">
-              <option selected value="AM">AM</option>
+            <input name="{{getName('Time')}}" type="text" class="form-control col-md-6 time-field" placeholder="7:00" value="{{time}}">
+            <select class="custom-select col-md-6" name="{{getName('Meridian')}}" value="{{meridian}}" class="col-md-6">
+              <option value="AM">AM</option>
               <option value="PM">PM</option>
             </select>
           </div>
         </div>
-      </template>
+      <!--</template>-->
   </template>
 <script src='//cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js'></script>
   <script>
@@ -41,15 +41,35 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         is: 'datetime-field',
         properties: {
           id:{type:String,value:''},
-          inputs: {type:Array,value:[
-            {offset:'',prefix:'start'},
-            {offset:' col-md-offset-2',prefix:'end'}
-          ]}
+          thetype:{type:String,value:""},
+          datetime:{type:String, notify: true},
+          date:{type:String, notify: true},
+          time:{type:String, notify: true},
+          offset:{type:String,value:""},
+          meridian:{type:String,value:""}
+
         },
-        observers: [],
+        observers: ['roundchanged(datetime)'],
         ready: function() {
-          //console.log(start);
-          this.id = (typeof id !== 'undefined') ? id : this.id;
+
+
+        },
+        roundchanged : function(datetime){
+          this.offset = (this.thetype == 'start') ? '' : ' col-md-offset-2';
+          this.parseDateTime();
+        },
+        getName(suffix){
+          return this.thetype+suffix;
+          //this.compileDateTime();
+        },
+        parseDateTime:function(){
+          var datetime = app.parseDateTime(this.datetime);
+          this.date = datetime.date;
+          this.time = datetime.time;
+          this.meridian =  datetime.meridian;
+        },
+        compileDateTime:function(){
+          return app.compileDateTime(this.date,this.time,this.meridian); 
         }
       });
     })();

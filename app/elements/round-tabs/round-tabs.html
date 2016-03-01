@@ -14,38 +14,97 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../hotel-form/hotel-form.html">
 <link rel="import" href="../greeters-form/greeters-form.html">
 <link rel="import" href="../team-form/team-form.html">
+<link rel="import" href="../event-calendar/event-calendar.html">
 
 <dom-module id="round-tabs" >
   <template>
     <style>
       .icon-squared-plus:before{    font-size: 20px;    top: 16px;    color: #ffc801; cursor:pointer}
       .btn-group.rounds-tabs button:last-of-type{border-bottom-right-radius: 4px;border-top-right-radius: 4px;}
+      .modal.round-tabs{top: 260px; left: 200px; }
+      .modal.round-tabs .modal-content{color: #cfd2da;    background-color: #252830;}
+      .modal.round-tabs .form-control{    display: block;
+          width: 100%;
+          height: 35px;
+          padding: 6px 12px;
+          font-size: 14px;
+          line-height: 1.5;
+          color: #fff;
+          background-color: #434857;
+          background-image: none;
+          border: 1px solid #434857;
+          border-radius: 4px;
+          box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
+          transition: border-color ease-in-out .15s, box-shadow ease-in-out .15s;
+        }
+        .btn-link:hover, .btn-link:focus{color: #ffc801;}
+      .modal-action{width:100%;border-color: #434857;}
+      .modal.round-tabs .modal-title{color: #fff;font-weight: bold;}
+      .modal.round-tabs .modal-header{    border-color: #434857;}
+      .modal.round-tabs .close{color: #fff;text-shadow:none;}
+      .modal.round-tabs .btn-link{background-color: #252830;;color:#ffc801;}
+      .modal.round-tabs .btn-link:hover, .modal.round-tabs .btn-link:focus{    color: #fff; background-color: #ffc801;border-color:#ffc801; }
+      .modal.round-tabs .form-control[name="location"]{width:80%;}
     </style>
 
-       <section class="selected-form" data-userid="{{user}}">
+       <section class="selected-form" data-userid$="{{user}}">
          <div class="btn-group rounds-tabs" role="group" aria-label="Rounds">
            <template is="dom-repeat" items="{{rounds}}">
-             <button type="button" class$="{{ activeClass(index) }} btn btn-primary" on-click="toggleRound" data-href="#rnd{{item.num}}">RD{{item.num}}</button>
+             <button type="button" class$="{{ activeClass(index) }} btn btn-primary" on-click="toggleRound" data-href="#rnd{{getRoundNumberFromIndex(index)}}"> RD{{getRoundNumberFromIndex(index)}}</button>
            </template>
-        </div><span class="icon icon-squared-plus" on-click="addRound"></span>
+        </div><span class="icon icon-squared-plus"  data-toggle="modal" data-target="#roundAdder"></span>
         <div class="forms-holder">
-          <userround-form   user="{{user}}" round="{{item.num}}"></userround-form>
+          <userround-form  user="{{user}}" data="{{data}}" ></userround-form>
           <hr>
           <template is="dom-repeat" items="{{rounds}}">
-            <div class$="{{ hiddenClass(index) }} round-body" id="round-{{item.num}}">
-              <interview-form user="{{user}}" round="{{item.num}}"></interview-form>
+            <div class$="{{ hiddenClass(index) }} round-body" id="round-{{getRoundNumberFromIndex(index)}}">
+              <interview-form user="{{user}}" round="{{getRoundNumberFromIndex(index)}}" data="{{item}}" ></interview-form>
               <hr>
-              <hotel-form user="{{user}}" round="{{item.num}}"></hotel-form>
+              <hotel-form user="{{user}}" round="{{getRoundNumberFromIndex(index)}}" data="{{item}}" ></hotel-form>
               <hr>
               <div class="row">
-                <div class="col-md-6"><greeters-form user="{{user}}" round="{{item.num}}"></greeters-form></div>
-                <div class="col-md-6 "><team-form user="{{user}}" round="{{item.num}}"></team-form></div>
+                <div class="col-md-6"><greeters-form user="{{user}}" round="{{getRoundNumberFromIndex(index)}}" greeters="{{item._greeters}}"></greeters-form><div class="clear"></div></div>
+                <div class="col-md-6 "><team-form user="{{user}}" round="{{getRoundNumberFromIndex(index)}}" team="{{item._team}}"></team-form><div class="clear"></div></div>
+                <div class="clear"></div>
+                <button type="button" on-click="updateRound" class="btn btn-primary-outline pull-right"><span class="icon icon-check"></span>Submit</submit>
               </div>
+                <hr>
+                <event-calendar user="{{user}}" round="{{getRoundNumberFromIndex(index)}}" events="{{item.itinerary.events}}" api="{{api}}"></event-calendar>
+                <div class="clear"></div>
             </div>
           </template>
         </div>
       </section>
-
+      <div class="modal" id="roundAdder" tabindex="-1" role="dialog" aria-labelledby="roundAdder">
+        <div class="modal-dialog modal-sm" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+              <h4 class="modal-title">Create a Round</h4>
+            </div>
+            <div class="modal-body">
+              <form class="form form-horizontal" id="add-round-form">
+                <div class="input-group">
+                  <label for="applicant">Applicant:   {{data.firstName}} {{data.lastName}}</label>
+                </div>
+                <div class="input-group">
+                  <label for="applicant">New Round:   {{getNextRoundNumber(rounds)}}</label>
+                </div>
+                <div class="input-group">
+                  <label for="location pull-left">Location</label>
+                  <input type="text" name="location" class="form-control" placeholder="Location" value="{{location}}">
+                </div>
+                <input type="hidden" name"id" value="{{user}}" />
+            </div>
+            <div class="modal-actions">
+              <button type="button" class="btn-link modal-action" on-click="addRound">
+                <strong>Add Round</strong>
+              </button>
+            </div>
+                          </form>
+          </div>
+      </div>
+    </div>
   </template>
 <script src='//cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js'></script>
   <script>
@@ -54,44 +113,128 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       Polymer({
         is: 'round-tabs',
         properties: {
-          token: {type:String},
-          data: {type:Object},
-          //rounds:{type:Array,value: function() { return []; }},
+          data: {
+              type:Object,
+              notify:true
+          },
+          rounds:{
+            type:Array,
+            notify:true
+          },
           user: {
             type:String,
             notify:true,
-            observer:'userchanged',
-          }
-          //dataSource:{type:Object}
+          },
+          location: {type:String}
         },
-        observers: [],
+        observers: ['userchanged(user)','roundschanged(rounds)','datachanged(data)'],
+
         ready: function() {
           this.api = api;
-          this.rounds = [{'num':1},{'num':2}];
+          this.rounds = [{'number':1},{'number':2}];
         },
         userchanged:function(){
-          console.log(this.user);
+          this.getRounds(data);
+        },
+        datachanged:function(data){
+          this.userForm().datachanged();
+        },
+        roundschanged(rounds){
+          //this.
+        },
+        setupNewRound(){
+          this.getRounds(this.user);
+        },
+        setResponse: function(data){
+          console.log(data);
+          this.data   = data[0];
+          this.rounds = data[0].rounds;
+        },
+        getRounds:function(){
+            this.api.getUserSingle(this.user);
+        },
+        getRoundNumberFromIndex:function(index){
+          //return index.number;
+          return index+1;
+        },
+        getRoundNumberFromBtn:function(){
+          var idx = $('.btn-group.rounds-tabs > .active').index();
+          return idx +1;
+        },
+        getNextRoundNumber(rounds){
+          return rounds.length + 1;
         },
         activeClass: function(index) {
-
             return (index == '0') ? 'active' : '';
         },
         hiddenClass:function(index){
           return (index == '0') ? '' : 'hidden';
         },
+        userForm: function(){
+          return this.getChildElement('userround-form');
+        },
+        getChildElement: function(name){
+          return document.querySelector(name);
+        },
         toggleRound : function(e,detail){
+          console.log(e);
+          if($('.rounds-tabs button').length < 2) return false;
           $('.rounds-tabs button.active').removeClass('active');
           $(e.srcElement).addClass('active');
-          var rnd =e.model.__data__.item.num;
-
+          var rnd = this.getRoundNumberFromIndex($(e.srcElement).index());//e.model.__data__.item.num;
           $('.round-body').each(function(){
             $(this).addClass('hidden');
           });
-
+          this.initTabCalendar(rnd);
           $('.round-body#round-'+rnd ).removeClass('hidden');
         },
+        initTabCalendar:function(rnd){
+          var cal = document.querySelector('#round-'+rnd+' event-calendar');
+          cal.initCalendar();
+        },
         addRound : function(e){
-          console.log(this.user);
+          e.preventDefault();
+          var loc = $('#add-round-form input[name="location"]').val();
+          if(loc == "") return false;
+          this.api.addRound(this.user,loc);
+        },
+        updateRound:function(e){
+          var data = this.parseEventData(e);
+          //console.log(data); return false;
+          var params = this.getInterviewFieldsByRound(data.rndNumber);
+
+          //params._greeters = this.getTeamGreetersByRound(data.rndNumber,'greeters-form');
+          //params._team     = this.getTeamGreetersByRound(data.rndNumber,'team-form');
+          params.itinerary = this.getReservationFieldsByRound(data.rndNumber);
+            //console.log(params);return false;
+          this.api.updateRound(data.user,data.rndNumber-1,params);
+        },
+        parseEventData:function(e){
+          var data  = {};
+          var edata = e.model.__data__;
+          data.rndId     = edata.item._id;
+          data.rndNumber = this.getRoundNumberFromBtn();//data.item.number;
+          data.user = edata.user;
+          return data;
+        },
+        getTeamGreetersByRound:function(rnd,type){
+          var el = this.getElementByRound(type,rnd);
+          var fields = el.getSelected();
+          return fields;
+        },
+        getReservationFieldsByRound:function(rnd){
+          var el     = this.getElementByRound('hotel-form',rnd);
+          var fields = el.getForSubmit();
+          return fields;//$.extend(fields,el.getSelected);
+        },
+        getInterviewFieldsByRound:function(rnd){
+          var el = this.getElementByRound('interview-form',rnd);
+          var fields = el.checkGetForSubmit();
+          return fields;
+        },
+        getElementByRound:function(id,rnd){
+          var rndid = "#round-"+rnd;
+          return document.querySelector(rndid +' '+id);
         }
       });
     })();

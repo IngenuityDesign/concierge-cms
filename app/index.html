@@ -107,15 +107,19 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                     <!--<a data-route="contact" href="{{baseUrl}}contact" on-click="onDataRouteClick">-->
                       <!--<iron-icon icon="mail"></iron-icon></a>-->
                       <ul class="collapse list-unstyled m-l-md " id="contentCollapse">
-                        <li><a data-route="adduser" href="{{baseUrl}}adduser" on-click="onDataRouteClick"><span>FAQ</span></a></li>
-                        <li><a data-route="edituser" href="{{baseUrl}}edituser" on-click="onDataRouteClick"><span>Image Gallery</span></a></li>
+                        <li><a data-route="managefaqs" href="{{baseUrl}}managefaqs" on-click="onDataRouteClick"><span>FAQ</span></a></li>
+                        <li><a data-route="manageimages" href="{{baseUrl}}manageimages" on-click="onDataRouteClick"><span>Image Gallery</span></a></li>
                       </ul>
                   </li>
                   <li>
-                    <a data-route="dashboard" href="{{baseUrl}}dashboard" on-click="onDataRouteClick">
-                      <!--<iron-icon icon="work"></iron-icon>-->
-                      <span>Manage Locations</span>
-                    </a>
+                    <a data-toggle="collapse" href="#contentCollapse1" aria-expanded="false" aria-controls="contentCollapse1"><span>Manage Locations</span></a>
+                      <!--<a data-route="contact" href="{{baseUrl}}contact" on-click="onDataRouteClick">-->
+                        <!--<iron-icon icon="mail"></iron-icon></a>-->
+                        <ul class="collapse list-unstyled m-l-md " id="contentCollapse1">
+                          <li><a data-route="managelocations" href="{{baseUrl}}managelocations" on-click="onDataRouteClick"><span>Office locations</span></a></li>
+                          <li><a data-route="managegreeters" href="{{baseUrl}}managegreeters" on-click="onDataRouteClick"><span>Greeters List</span></a></li>
+                          <li><a data-route="manageteam" href="{{baseUrl}}manageteam" on-click="onDataRouteClick"><span>Team Members</span></a></li>
+                        </ul>
                 </li>
             </ul>
             </paper-menu>
@@ -212,6 +216,28 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 <div>This is <span>{{params.name}}</span>'s section</div>
               </paper-material>
             </section>
+
+            <section data-route="managelocations">
+              <h2 class="page-title">Manage Locations</h2>
+              <manage-locations api="{{api}}"></manage-locations>
+            </section>
+            <section data-route="managefaqs">
+              <h2 class="page-title">Manage FAQs</h2>
+              <manage-faqs api="{{api}}"></manage-faqs>
+            </section>
+            <section data-route="managegreeters">
+              <h2 class="page-title">Greeters List</h2>
+              <manage-greeters api="{{api}}"></manage-greeters>
+            </section>
+            <section data-route="manageteam">
+              <h2 class="page-title">Team Members</h2>
+              <manage-team api="{{api}}"></manage-team>
+            </section>
+            <section data-route="manageimages">
+              <h2 class="page-title">Team Members</h2>
+              <manage-images api="{{api}}"></manage-images>
+            </section>
+
             <section class="info-section" data-route="adduser">
 
               <paper-material elevation="1">
@@ -227,7 +253,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 Add Note
                 </h2>
                 <!--<noteadd-form api="{{api}}"></noteadd-form>-->
-                <useredit-form api="{{api}}" data="{{data}}"></useredit-form>
+                <useredit-form api="{{api}}" users="{{api.data}}"></useredit-form>
               </paper-material>
             </section>
           </iron-pages>
@@ -260,17 +286,27 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
   </template>
 
   <script src="../bower_components/jquery/dist/jquery.min.js"></script>
+  <script src="../bower_components/moment/min/moment.min.js"></script>
+  <script src="../bower_components/fullcalendar/dist/fullcalendar.min.js"></script>
+
   <!-- build:js scripts/app.js -->
   <script src="scripts/app.js"></script>
   <script src="scripts/toolkit.js"></script>
   <script src="scripts/tablesorter.min.js"></script>
-    <script src="scripts/custom/datepicker.js"></script>
+  <script src="scripts/custom/datepicker.js"></script>
   <!-- endbuild-->
   <script>
     var api = document.createElement('cms-api');
     var data = [
       {'name':'larry','email':'larry@mail.com','phone':'2032124343','location':'13 streetname road'}
     ];
+    $('body').on('focus','textarea',function(e){
+      app.expandTextarea($(this));
+    }).on('blur','textarea',function(e){
+      if($(e.relatedTarget).hasClass('btn-link')) return false;
+      app.contractTextarea($(this));
+    });
+
   </script>
 </body>
 

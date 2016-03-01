@@ -38,44 +38,22 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       td.bound-cell.paper-datatable{color:#fff!important;}
       tr.selected > td:not(:last-child){background-color:#ffc801; color:#000;}
       /deep/ paper-datatable tr.selected > td:not(:nth-last-child(2)){background-color:#ffc801!important; color:#000!important;}
-    </style>
 
-     <!--<paper-datatable-card id="datatableCard" header="Users"  data-source="{{data}}" progress id-property="sha1">
-       <div toolbar-main>
-       </div>
-       <div toolbar-select-single>
-         <paper-icon-button icon="info"></paper-icon-button>
-       </div>
-       <div toolbar-select>
-         <paper-icon-button icon="delete" on-tap="delete"></paper-icon-button>
-       </div>-->
-       <paper-datatable id="datatable" data="{{data}}" style="color:#fff;" cell-style="color:#fff;" ><!--selectable -->
-         <paper-datatable-column id="nameColumn" header="Name" property="name"  style="min-width: 120px;color:#fff;" cell-style="color:#fff;" sortable></paper-datatable-column>
-         <paper-datatable-column header="E-mail" property="email" style="min-width: 150px;color:#fff;" cell-style="color:#fff;" sortable></paper-datatable-column>
-         <paper-datatable-column header="Phone" property="phone" style="min-width: 100px;color:#fff;" cell-style="color:#fff;" sortable></paper-datatable-column>
-         <paper-datatable-column header="Address" property="location"  style="min-width: 180px;color:#fff;" cell-style="color:#fff;" sortable>
+    </style>
+       <paper-datatable id="datatable" data="{{users}}" style="color:#fff;" cell-style="color:#fff;" ><!--selectable -->
+         <paper-datatable-column id="nameColumn" header="Name" property="firstName"  style="min-width: 120px;color:#fff;" cell-style="color:#fff;" sortable></paper-datatable-column>
+         <paper-datatable-column header="Last Name" property="lastName" style="min-width: 150px;color:#fff;" cell-style="color:#fff;" sortable></paper-datatable-column>
+         <paper-datatable-column header="E-mail" property="linkedinEmail" style="min-width: 100px;color:#fff;" cell-style="color:#fff;" sortable></paper-datatable-column>
+         <paper-datatable-column header="position" property="position"  style="min-width: 180px;color:#fff;" cell-style="color:#fff;" sortable>
          </paper-datatable-column>
-         <paper-datatable-column header="Actions"  style="min-width: 250px;color:#fff;" cell-style="color:#fff;" >
+         <paper-datatable-column header="Actions"  property="id" style="min-width: 250px;color:#fff;" cell-style="color:#fff;" >
            <template>
-             <button class="btn btn-xs btn-primary-outline edit" on-click="editUser" data-id="[[value.id]]">MANAGE</button>
-             <button class="btn btn-xs btn-warning-outline deactivate" on-click="deactivateUser" data-id="[[value.id]]">DEACTIVATE</button>
+             <button class="btn btn-xs btn-primary-outline edit" on-click="editUser" value="{{value}}">MANAGE</button>
+             <button class="btn btn-xs btn-warning-outline deactivate" on-click="deactivateUser" value="{{value}}">DEACTIVATE</button>
            </template>
          </paper-datatable-column>
 
        </paper-datatable>
-       <!--<section class="selected-form" data-id="{{selectedItem.id}}">
-         <div class="btn-group" role="group" aria-label="Basic example">
-           <template is="dom-repeat" items="{{rounds}}">
-             <button type="button" class="btn btn-primary" data-round-id="{{item.num}">RD{{item.num}}</button>
-           </template>
-        </div><span class="icon icon-squared-plus"></span>
-        <form>
-          <div class="legend">Recruit Information</div>
-          <template is="dom-repeat" items="{{userInfo}}">
-            <input type="text" class="form-control" name="{{item.name}}">{{item.label}}</button>
-          </template>
-        </form>
-      </section>-->
 
       <round-tabs user="{{user}}" api="{{api}}" ></round-tabs>
   </template>
@@ -88,7 +66,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         properties: {
           api:{type:Object},
           token: {type:String},
-          data: {type:Object},
+          users: {type:Object,notify:true},
           user:{
             type:String,
             notify: true//,
@@ -96,25 +74,19 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           }
           //dataSource:{type:Object}
         },
-        observers: [],
+        observers: ['setResponse(data)'],
         ready: function() {
           this.api = api;
-          //this.userid = "1";
+          this.api.getUsers();
+          $('[data-key="#0"]').addClass('selected');
+        },
+        setResponse(data){
+          this.set('users', this.api.data);
+          this.user = this.users[0]['id'];
+          setTimeout(function(){
+            $('[data-key="#0"]').addClass('selected');
+          }, 100);
 
-          this.userinfo = [
-            {name:'firstName',label:'First Name'},
-            {name:'lastName',label:'Last Name'},
-            {name:'position',label:'Position Interviewing For'},
-          ]
-          this.data = [
-            {'id':1,
-            'name':'larry',
-            'email':'larry@mail.com',
-            'phone':'2032124343',
-            'location':'13 streetname road'
-          }
-          ];
-          this.user = this.data[0]['id'];
         },
         submitForm:function(e){
           e.preventDefault();
@@ -147,8 +119,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         editUser:function(e){
           this.user = this.getClickedUser(e).id;
           var $row = $(e.target);
+          $('#datatable tr.selected').removeClass('selected');
           $row.parents('tr').addClass('selected');
-          console.log(this.user);
           /*if (this.$.childComponent) {
                this.$.childComponent.sharedValue = value;
            }*/

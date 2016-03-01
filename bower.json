@@ -10,11 +10,15 @@
     "polymer": "Polymer/polymer#^1.2.0",
     "iron-input": "PolymerElements/iron-input#~1.0.7",
     "iron-selector": "PolymerElements/iron-selector#~1.0.8",
-    "paper-datatable": "~0.9.8"
+    "paper-datatable": "~0.9.8",
+    "moment": "~2.11.1"
   },
   "devDependencies": {
     "web-component-tester": "*",
-    "paper-datatable": "~0.9.8"
+    "paper-datatable": "~0.9.8",
+    "moment-js": "~0.3.0",
+    "cryptojslib": "~3.1.2",
+    "fullcalendar": "~2.6.0"
   },
   "ignore": []
 }

@@ -10072,6 +10072,20 @@ form.sidebar-form.bottom {
   border-bottom: none!important;
   height: 80px;
 }
+.modal .form-control {
+  color: #fff!important;
+  background-color: #434857!important;
+  background-image: none;
+  border: 1px solid #434857;
+  border-radius: 4px!important;
+  box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
+  transition: border-color ease-in-out 0.15s, box-shadow ease-in-out 0.15s;
+}
+.modal .form-control:focus {
+  background-color: #fff!important;
+  color: #000!important;
+  border: none!important;
+}
 /*#mainContainer.paper-scroll-header-panel{top:80px!important;}*/
 paper-menu a:not([style-scope]):not(.style-scope) {
   color: #fff!important;
@@ -10128,6 +10142,53 @@ paper-menu ul.collapse.in li.active > a:not([style-scope]):not(.style-scope) {
 }
 paper-menu ul.collapse.in li > a:not([style-scope]):not(.style-scope):hover {
   color: #ffc801 !important;
+}
+.fc-nonbusiness.fc-bgevent {
+  background-color: #434857;
+}
+.fc-toolbar .fc-center h2 {
+  background-color: #00aeef;
+  color: #fff;
+  text-transform: uppercase;
+  font-weight: bold;
+  padding: 6px;
+  font-size: 21px;
+  border-radius: 2px;
+  width: 240px;
+}
+.fc-toolbar button {
+  background-color: #00aeef;
+  color: #fff;
+}
+.fc-state-default {
+  background-image: none!important;
+  background-color: transparent!important;
+  color: #00aeef !important;
+  text-shadow: none!important;
+  border-color: #00aeef !important;
+}
+.fc-state-default.fc-state-active {
+  background-color: #00aeef !important;
+  color: #fff!important;
+}
+.fc-toolbar .fc-right button {
+  margin: 0 0 0 -1px;
+  border-bottom-right-radius: 0;
+  border-top-right-radius: 0;
+}
+.fc-toolbar .fc-right button:not(:first-child) {
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+}
+.fc-toolbar .fc-right button:last-child {
+  border-top-right-radius: 4px;
+  border-bottom-right-radius: 4px;
+}
+.fc-unthemed .fc-today {
+  background-color: rgba(0, 174, 239, 0.3) !important;
+}
+.fc-unthemed .fc-state-highlight {
+  border-color: #00aeef !important;
 }
 .blue {
   color: #00aeef;
